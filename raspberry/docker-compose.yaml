@@ -1,17 +1,65 @@
 version: "3.7"
 services:
   db:
-    build: .
+    build: ./db
     container_name: db
     ports:
       - 3306:3306
     environment:
-      - MYSQL_ROOT_PASSWORD=VeryComplicatedPassword
+      - MYSQL_ROOT_PASSWORD=AveryComplicatedPassword
       - MYSQL_DATABASE=wordpress
       - MYSQL_USER=wordpress
-      - MYSQL_PASSWORD=VeryComplciatedPassword
+      - MYSQL_PASSWORD=AveryComplicatedPassword
+    #assign container to the network
+    networks:
+      website_network:
+        aliases: 
+          - wordpress 
+    #assign persistent volume to container
+    volumes:
+      - db_data:/var/lib/mysql
+    
+
   wordpress:
     build: .
-    container_name: wordpress_new
+    container_name: wordpress
     ports:
-      - 80:80
+      - 80
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORKPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: AveryComplicatedPassword
+      WORDPRESS_DB_NAME: wordpress
+
+    volumes:
+      - wordpress:/var/www/html
+
+    networks:
+      website_network:
+        aliases: 
+          - wordpress 
+
+  nginx:
+    build: ./nginx
+    container_name: nginx
+    ports:
+      - 443:443
+      - 80
+
+    networks:
+      website_network:
+        aliases: 
+          - nginx-alias 
+
+#define networks for docker-compose
+networks:
+  website_network:
+    name: website_network
+
+volumes:
+  db_data:
+    driver: local
+    name: db_data
+  wordpress:
+    driver: local
+    name: wordpress
