@@ -1,12 +1,13 @@
-dashboard:
-  enabled: true
-  domain: traefik.localhost
-  auth:
-    basic:
-      admin: $2y$05$kpCJY2gJWlgG5CUs5tdPx.2xGJ4xyqhWtjiiM/NKfHmj3pfUPsap2
-ssl:
-  enabled: true
-  enforced: true
-  permanentRedirect: true
-  generateTLS: true
-  defaultCN: "*.localhost"
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: dashboard
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`traefik.localhost`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
+      kind: Rule
+      services:
+        - name: api@internal
+          kind: TraefikService
