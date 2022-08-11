@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #access return code with $? and compare operation with -eq or ne
-#$? return string
+#$? return string78
 HOST="google.com"
 ping -c 1 $HOST
 if [ "$?" -eq "0" ]
