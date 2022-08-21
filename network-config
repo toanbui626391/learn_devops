@@ -41,3 +41,10 @@ wifis:
 #          identity: "me@example.com"
 #          password: "passw0rd"
 #          ca-certificate: /etc/my_ca.pem
+
+hostname -I
+192.168.1.2 172.22.0.1 172.17.0.1 172.21.0.1 172.19.0.1 2402:800:63b7:af95:e65f:1ff:fec2:3432
+ip r | grep default
+default via 192.168.1.1 dev wlan0 proto dhcp src 192.168.1.2 metric 600
+cat /etc/resolv.conf
+127.0.0.53

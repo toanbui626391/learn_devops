@@ -26,6 +26,11 @@ services:
     volumes:
       - db:/var/lib/mysql
 
+  nginx:
+    build: ./nginx
+    name: nginx
+    
+
 volumes:
   wordpress:
   db:
