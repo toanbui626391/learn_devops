@@ -47,14 +47,35 @@ resource "random_id" "bucket_prefix" {
 
 #create source bucket
 resource "google_storage_bucket" "source_bucket" {
-  name                        = "${random_id.bucket_prefix.hex}-gcf-source" # Every bucket name must be globally unique
+  name                        = "${random_id.bucket_prefix.hex}-test-source" # Every bucket name must be globally unique
   location                    = var.region
   uniform_bucket_level_access = true
 }
 
+#create dest bucket
+resource "google_storage_bucket" "dest_bucket" {
+  name                        = "${random_id.bucket_prefix.hex}-test-dest" # Every bucket name must be globally unique
+  location                    = var.region
+  uniform_bucket_level_access = true
+}
+
+#create templates buckets
+resource "google_storage_bucket" "templates_bucket" {
+  name                        = "${random_id.bucket_prefix.hex}-test-dataflow-templates" # Every bucket name must be globally unique
+  location                    = var.region
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket" "temp_bucket" {
+  name                        = "${random_id.bucket_prefix.hex}-test-dataflow-temp" # Every bucket name must be globally unique
+  location                    = var.region
+  uniform_bucket_level_access = true
+}
+
+
 #upload source code to a bucket
 resource "google_storage_bucket_object" "object" {
-  name   = "function-source.zip"
+  name   = "test_cloud_function.zip"
   bucket = google_storage_bucket.source_bucket.name
   source = var.python_source
 }
@@ -114,6 +135,13 @@ resource "google_project_iam_member" "artifactregistry_reader" {
   depends_on = [google_project_iam_member.event_receiving]
 }
 
+resource "google_project_iam_member" "dataflow_admin" {
+  project    = data.google_project.project.project_id
+  role       = "roles/dataflow.admin"
+  member     = "serviceAccount:${google_service_account.account.email}"
+  depends_on = [google_project_iam_member.event_receiving]
+}
+
 
 #create cloud function
 resource "google_cloudfunctions2_function" "function" {
@@ -121,9 +149,9 @@ resource "google_cloudfunctions2_function" "function" {
     google_project_iam_member.event_receiving,
     google_project_iam_member.artifactregistry_reader,
   ]
-  name        = "function"
+  name        = "dataflow-trigger"
   location    = var.region
-  description = "a new function"
+  description = "trigger dataflow job to move cloud storage object from src to dest bucket"
 
   build_config {
     runtime     = var.runtime
@@ -145,7 +173,7 @@ resource "google_cloudfunctions2_function" "function" {
     available_memory   = "256M"
     timeout_seconds    = 60
     environment_variables = {
-      SERVICE_CONFIG_TEST = "config_test"
+      PROJECT_ID = data.google_project.project.project_id
     }
     ingress_settings               = "ALLOW_INTERNAL_ONLY"
     all_traffic_on_latest_revision = true

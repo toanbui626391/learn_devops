@@ -35,13 +35,13 @@ variable "runtime" {
 
 variable "python_source" {
   type    = string
-  default = "./python-docs-samples/functions/v2/storage/function-source.zip"
+  default = "./cloud_function/test_cloud_function.zip"
 
 }
 #function to run in the source code
 variable "entry_point" {
   type    = string
-  default = "hello_gcs"
+  default = "dataflow_trigger"
 }
 
 variable "gcs_event" {

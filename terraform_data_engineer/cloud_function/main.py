@@ -16,7 +16,7 @@ def dataflow_trigger(cloud_event):
     timeCreated = data["timeCreated"]
     updated = data["updated"]
     #print event data
-    print("this is test code")
+    print("event data:")
     # print("data: {}".format(data))
     print("event_id: {}".format(event_id))
     print("event_type: {}".format(event_type))
@@ -28,6 +28,8 @@ def dataflow_trigger(cloud_event):
     
     #prepare data to execute job
     credentials, _ = google.auth.default()
+    print("service_account_email: {}".format(credentials.service_account_email))
+    # print()
     service = build('dataflow', 'v1b3', credentials=credentials)
     project_id = os.environ["PROJECT_ID"]
     print("project_id from environment variable: {}".format(project_id))
