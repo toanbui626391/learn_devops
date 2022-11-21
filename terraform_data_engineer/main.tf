@@ -173,7 +173,8 @@ resource "google_cloudfunctions2_function" "function" {
     available_memory   = "256M"
     timeout_seconds    = 60
     environment_variables = {
-      PROJECT_ID = data.google_project.project.project_id
+      PROJECT_ID = data.google_project.project.project_id,
+      LOCATION = var.region
     }
     ingress_settings               = "ALLOW_INTERNAL_ONLY"
     all_traffic_on_latest_revision = true

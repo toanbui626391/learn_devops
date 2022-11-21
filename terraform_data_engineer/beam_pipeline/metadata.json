@@ -1,0 +1,16 @@
+{
+    "name": "beam pipeline test",
+    "description": "beam pipeline test for python flex template.",
+    "parameters": [
+      {
+        "name": "source_path",
+        "label": "GS Source File Path",
+        "helpText": "Gs source file path"
+      },
+      {
+        "name": "dest_path",
+        "label": "GS Destination File Path",
+        "helpText": "Gs destination file path"
+      }
+    ]
+  }
