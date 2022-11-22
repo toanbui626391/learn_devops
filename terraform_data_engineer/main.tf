@@ -30,7 +30,7 @@ terraform {
 #note about terraform google provider authentication
   #reference link: https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#authentication
   #if run terraform on your workstation (your pc)
-
+  #if we use user application default credential (adc), we do not need to use service-account key
 provider "google" {
   # credentials = file("../terraform/terraform_personal.json")
 
