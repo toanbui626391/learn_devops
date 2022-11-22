@@ -3,7 +3,12 @@
     # \ to escape new line.
     # && (and operator) continue next command when previous command is success
 #your image will build base on below image with FROM    
-FROM gcr.io/dataflow-templates-base/python3-template-launcher-base
+
+#keep your base image up-to-date
+    #your local computer run new os 
+    # wee need to keep our base image up-to-date to avoid packages diffenent. Can not find package
+    # list of base image for dataflow: https://console.cloud.google.com/gcr/images/dataflow-templates-base
+FROM gcr.io/dataflow-templates-base/python38-template-launcher-base
 #config variable with ENV. variable is reference to container file system (not your local file system)
 ENV FLEX_TEMPLATE_PYTHON_REQUIREMENTS_FILE="/template/requirements.txt"
 ENV FLEX_TEMPLATE_PYTHON_PY_FILE="/template/batch_pipeline.py"

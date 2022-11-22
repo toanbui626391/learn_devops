@@ -37,11 +37,12 @@ def dataflow_trigger(cloud_event):
     dest_path = "dest_path_here"
 
     #template_path here
-    template_path = "gs://a99a21451e2521d5-test-dataflow-templates/dataflow_test.json" 
-    temp_bucket = "gs://a99a21451e2521d5-test-dataflow-temp/"
+    template_path = os.environ["template_path"] 
+    stagging_bucket = os.environ["stagging_bucket"]
+    temp_bucket = os.environ["temp_bucket"]
     location = os.environ["LOCATION"]
     source_path = "gs://{}/{}".format(bucket, name)
-    dest_path = "gs://a99a21451e2521d5-test-dest/"
+    dest_path = os.environ["dest_path"]
     template_body = {
         "launchParameter": {
             #Details: "JobName invalid; the name must consist of only the characters [-a-z0-9], starting with a letter and ending with a letter or number">
@@ -51,7 +52,8 @@ def dataflow_trigger(cloud_event):
                 "dest_path": dest_path,
             },
             "environment": {
-                "tempLocation": temp_bucket
+                "tempLocation": temp_bucket,
+                "stagingLocation": stagging_bucket
             },
             "containerSpecGcsPath": template_path
         },

@@ -48,5 +48,10 @@ variable "gcs_event" {
   type    = string
   default = "google.cloud.storage.object.v1.finalized"
 }
+#################dataflow config
+variable "worker_sa" {
+  type    = string
+  default = "149838564778-compute@developer.gserviceaccount.com"
+}
 
 
