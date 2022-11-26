@@ -270,7 +270,172 @@ resource "google_service_account_iam_binding" "worker_sa_personation" {
   ]
 }
 
+#############################################config cloud composer
 
+#enable service apis in google with
+resource "google_project_service" "composer_api" {
+  project = data.google_project.project.project_id
+  service = "composer.googleapis.com"
+  // Disabling Cloud Composer API might irreversibly break all other
+  // environments in your project.
+  disable_on_destroy = false
+}
+
+resource "google_service_account" "composer_sa" {
+  account_id   = "composer-sa"
+  display_name = "Service Account for Cloud Composer"
+}
+
+#assign role to a principle (service account)
+resource "google_project_iam_member" "composer_sa_binding" {
+  project  = var.project_id
+  member   = "serviceAccount:${google_service_account.composer_sa.email}"
+  // Role for Public IP environments
+  role     = "roles/composer.worker"
+}
+
+
+
+#note about cloud composer service agent
+  #it is google managed service account to manage resource related to cloud composer
+#allow clouse composer agent to use compose_sa account
+  #allow member to service account to use target service account
+resource "google_service_account_iam_member" "compose_agent_sa_binding" {
+  service_account_id = google_service_account.composer_sa.id
+  role = "roles/composer.ServiceAgentV2Ext"
+  member = "serviceAccount:service-${data.google_project.project.number}@cloudcomposer-accounts.iam.gserviceaccount.com"
+}
+
+# resource "google_composer_environment" "composer_env" {
+
+#   name = "composer-env"
+#   region = var.region
+
+#   config {
+#     software_config {
+#       image_version = "composer-2.0.31-airflow-2.2.5"
+#     }
+
+#     node_config {
+#       service_account = google_service_account.composer_sa.email
+#     }
+
+#   }
+# }
+
+########################################config bigquery
+#enable on bigquery 
+resource "google_project_service" "biqquery_api" {
+  project = data.google_project.project.project_id
+  service = var.bigquery_api
+  // Disabling Cloud Composer API might irreversibly break all other
+  // environments in your project.
+  disable_on_destroy = false
+}
+#create bigquery table with schema definition
+#Dataset IDs must be alphanumeric (plus underscores) and must be at most 1024 characters long.
+resource "google_bigquery_dataset" "data_engineer" {
+  dataset_id                  = "data_engineer"
+  friendly_name               = "data engineer data set"
+  description                 = "test dataset for data engineer"
+  location                    = var.region
+  default_table_expiration_ms = 3600000
+
+  #lables is used for organize resource (filter, cost and used analytics) for each teams or department
+  labels = {
+    env = "data_engineer"
+  }
+}
+
+resource "google_bigquery_table" "table_one" {
+  dataset_id = google_bigquery_dataset.data_engineer.dataset_id
+  table_id   = "table_one"
+
+  labels = {
+    env = "data_engineer"
+  }
+
+  #reference about string and template: https://developer.hashicorp.com/terraform/language/expressions/strings#strings-and-templates
+  #heredoc string allow multiple line string in terraform
+  #do not use heredoc string for json or yaml. use jsonencode or yamlencode for json and yaml synstax
+  #it is best practice to just load a json file from local
+  #file function: read file and return as tring
+  schema = file("./table_one_schema.json")
+
+}
+
+
+#assign role to a principle (service account)
+resource "google_project_iam_member" "composer_sa_binding_two" {
+  project  = var.project_id
+  member   = "serviceAccount:${google_service_account.composer_sa.email}"
+  // Role for Public IP environments
+  role     = "roles/dataflow.developer"
+}
+
+resource "google_service_account_iam_binding" "worker_sa_personation_two" {
+  service_account_id = data.google_service_account.worker_sa.name
+  role       = "roles/iam.serviceAccountUser"
+  members = [
+    "serviceAccount:${google_service_account.composer_sa.email}"
+  ]
+}
+
+# resource "google_bigquery_table" "sheet" {
+#   dataset_id = google_bigquery_dataset.default.dataset_id
+#   table_id   = "sheet"
+
+#   external_data_configuration {
+#     autodetect    = true
+#     source_format = "GOOGLE_SHEETS"
+
+#     google_sheets_options {
+#       skip_leading_rows = 1
+#     }
+
+#     source_uris = [
+#       "https://docs.google.com/spreadsheets/d/123456789012345",
+#     ]
+#   }
+# }
+#################################config CI CD with cloud build
+#enable cloud build api
+resource "google_project_service" "cloud_build_service" {
+  project = data.google_project.project.project_id
+  service = var.cloud_build_api
+  // Disabling Cloud Composer API might irreversibly break all other
+  // environments in your project.
+  disable_on_destroy = false
+}
+
+#create bucket to storage terraform state
+resource "google_storage_bucket" "terraform_state_bucket" {
+  name                        = "${var.project_id}-tfstate" # Every bucket name must be globally unique
+  location                    = var.region
+  storage_class = var.storage_class
+  versioning {
+    enabled = true
+  }
+
+
+  lifecycle_rule {
+    condition {
+      age = 0
+      num_newer_versions = 2
+    }
+    action {
+      type = "Delete"
+    }
+  }
+
+}
+
+#grant roles/role.editor for cloudbuild default service account
+resource "google_project_iam_member" "project" {
+  project = var.project_id
+  role    = "roles/editor"
+  member  = "serviceAccount:${var.cloudbuild_sa}"
+}
 
 
 
