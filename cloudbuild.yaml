@@ -1,5 +1,10 @@
 steps:
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'build', '-t', 'gcr.io/${PROJECT_ID}/gcf-artifacts/dataflow--trigger:latest', 'terraform_data_engineer/beam_pipeline/' ]
+
+- name: 'gcr.io/cloud-builders/gcloud'
+  args: [ 'dataflow', 'flex-template', 'build', 'gs://fce2845e810918fb-test-dataflow-templates/dataflow_test.json',
+      '--image', 'gcr.io/$PROJECT_ID/dataflow/dataflow_test:latest', '--sdk-language', 'PYTHON', '--metadata-file',
+      'terraform_data_engineer/beam_pipeline/metadata.json' ]
 images:
   - 'gcr.io/${PROJECT_ID}/gcf-artifacts/dataflow--trigger:latest'
