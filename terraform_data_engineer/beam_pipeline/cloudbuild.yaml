@@ -1,5 +1,5 @@
 steps:
 - name: 'gcr.io/cloud-builders/docker'
-  args: [ 'build', '-t', 'gcr.io/$PROJECT_ID/gcf-artifacts/dataflow-trigger:lastest', 'terraform_data_engineer/beam_pipeline' ]
+  args: [ 'build', '-t', 'gcr.io/$PROJECT_ID/gcf-artifacts/dataflow-trigger:lastest', 'terraform_data_engineer/beam_pipeline/' ]
 images:
 - 'gcr.io/$PROJECT_ID/gcf-artifacts/dataflow-trigger:lastest'
