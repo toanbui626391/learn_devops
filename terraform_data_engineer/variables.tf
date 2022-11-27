@@ -54,4 +54,23 @@ variable "worker_sa" {
   default = "149838564778-compute@developer.gserviceaccount.com"
 }
 
+#################bigquery config
+variable "bigquery_api" {
+  type    = string
+  default = "bigquery.googleapis.com"
+}
+##################cloud build config
+variable "cloud_build_api" {
+  type    = string
+  default = "cloudbuild.googleapis.com"
+}
 
+variable "storage_class" {
+  type    = string
+  default = "STANDARD"
+}
+
+variable "cloudbuild_sa" {
+  type    = string
+  default = "149838564778@cloudbuild.gserviceaccount.com"
+}
