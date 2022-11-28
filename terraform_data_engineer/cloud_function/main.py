@@ -5,6 +5,7 @@ import os
 
 @functions_framework.cloud_event
 def dataflow_trigger(cloud_event):
+    print("this is a test change")
     data = cloud_event.data
 
     event_id = cloud_event["id"]
