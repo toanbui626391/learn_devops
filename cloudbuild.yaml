@@ -6,5 +6,14 @@ steps:
   args: [ 'dataflow', 'flex-template', 'build', 'gs://fce2845e810918fb-test-dataflow-templates/dataflow_test.json',
       '--image', 'gcr.io/$PROJECT_ID/dataflow/dataflow_test:latest', '--sdk-language', 'PYTHON', '--metadata-file',
       'terraform_data_engineer/beam_pipeline/metadata.json' ]
+
+#deploy cloud function, test
+- name: 'gcr.io/cloud-builders/gcloud'
+  args: [ 'functions', 'deploy', 'dataflow-trigger', '--gen2', '--runtime=python38',
+      '--region=asia-southeast1', '--source=terraform_data_engineer/cloud_function', 
+      '--entry-point=dataflow_trigger', '--trigger-event-filters="type=google.cloud.storage.object.v1.finalized"', 
+      '--trigger-event-filters="bucket=fce2845e810918fb-gcf-trigger-bucket"',
+      '--env-vars-file=terraform_data_engineer/cloud_function/env.yaml',
+      '--service-account=gcf-sa@airflow-gke-338120-352104.iam.gserviceaccount.com' ]
 images:
   - 'gcr.io/${PROJECT_ID}/gcf-artifacts/dataflow--trigger:latest'
