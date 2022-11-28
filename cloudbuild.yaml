@@ -11,7 +11,7 @@ steps:
 - name: 'gcr.io/cloud-builders/gcloud'
   args: [ 'functions', 'deploy', 'dataflow-trigger-gen1', '--runtime=python38',
       '--region=asia-southeast1', '--source=terraform_data_engineer/cloud_function', 
-      '--entry-point=dataflow_trigger', '--trigger-event=google.cloud.storage.object.v1.finalized', 
+      '--entry-point=dataflow_trigger', '--trigger-event=google.storage.object.finalize', 
       '--trigger-resource=fce2845e810918fb-gcf-trigger-bucket',
       '--env-vars-file=terraform_data_engineer/cloud_function/env.yaml',
       '--service-account=gcf-sa@airflow-gke-338120-352104.iam.gserviceaccount.com' ]
