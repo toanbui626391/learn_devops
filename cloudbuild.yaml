@@ -15,5 +15,20 @@ steps:
       '--trigger-resource=fce2845e810918fb-gcf-trigger-bucket',
       '--env-vars-file=terraform_data_engineer/cloud_function/env.yaml',
       '--service-account=gcf-sa@airflow-gke-338120-352104.iam.gserviceaccount.com' ]
+
+#build pipeline_read_csv flex template and deploy cloud function
+- name: 'gcr.io/cloud-builders/gcloud'
+  args: [ 'dataflow', 'flex-template', 'build', 'gs://fce2845e810918fb-test-dataflow-templates/pipeline_read_csv.json',
+      '--image', 'gcr.io/$PROJECT_ID/dataflow/pipeline_read_csv:latest', '--sdk-language', 'PYTHON', '--metadata-file',
+      'terraform_data_engineer/beam_read_csv/metadata.json' ]
+
+- name: 'gcr.io/cloud-builders/gcloud'
+  args: [ 'functions', 'deploy', 'dataflow-trigger-gen1', '--runtime=python38',
+      '--region=asia-southeast1', '--source=terraform_data_engineer/beam_read_csv/cloud_function', 
+      '--entry-point=dataflow_trigger', '--trigger-event=google.storage.object.finalize', 
+      '--trigger-resource=fce2845e810918fb-gcf-trigger-bucket',
+      '--env-vars-file=terraform_data_engineer/beam_read_csv/cloud_function/env.yaml',
+      '--service-account=gcf-sa@airflow-gke-338120-352104.iam.gserviceaccount.com' ]
 images:
   - 'gcr.io/${PROJECT_ID}/gcf-artifacts/dataflow--trigger:latest'
+  - 'gcr.io/${PROJECT_ID}/gcf-artifacts/pipeline_read_csv:latest'

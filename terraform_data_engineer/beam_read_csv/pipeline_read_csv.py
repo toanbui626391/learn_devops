@@ -65,6 +65,7 @@ def run(
 ############################################################ main program
 if __name__ == "__main__":
     #do not need to init logging instance
+    #some test change
     logging.getLogger().setLevel(logging.INFO)
     parser = argparse.ArgumentParser()
 
