@@ -17,6 +17,9 @@ steps:
       '--service-account=gcf-sa@airflow-gke-338120-352104.iam.gserviceaccount.com' ]
 
 #build pipeline_read_csv flex template and deploy cloud function
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build', '-t', 'gcr.io/${PROJECT_ID}/gcf-artifacts/pipeline_read_csv:latest', 'terraform_data_engineer/beam_pipeline/' ]
+
 - name: 'gcr.io/cloud-builders/gcloud'
   args: [ 'dataflow', 'flex-template', 'build', 'gs://fce2845e810918fb-test-dataflow-templates/pipeline_read_csv.json',
       '--image', 'gcr.io/$PROJECT_ID/dataflow/pipeline_read_csv:latest', '--sdk-language', 'PYTHON', '--metadata-file',
