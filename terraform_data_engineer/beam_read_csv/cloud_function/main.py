@@ -3,6 +3,7 @@ from googleapiclient.discovery import build
 import google.auth
 import os
 
+#trigger function command: gsutil cp terraform_data_engineer/data/test_data.csv gs://fce2845e810918fb-gcf-trigger-bucket/
 @functions_framework.cloud_event
 def dataflow_trigger(cloud_event):
     print("this is a test change")
@@ -34,8 +35,7 @@ def dataflow_trigger(cloud_event):
     service = build('dataflow', 'v1b3', credentials=credentials)
     project_id = os.environ["PROJECT_ID"]
     print("project_id from environment variable: {}".format(project_id))
-    source_path = "source_path_here"
-    dest_path = "dest_path_here"
+
 
     #template_path here
     job_name = os.environ["job_name"]
@@ -43,15 +43,16 @@ def dataflow_trigger(cloud_event):
     stagging_bucket = os.environ["stagging_bucket"]
     temp_bucket = os.environ["temp_bucket"]
     location = os.environ["LOCATION"]
-    source_path = "gs://{}/{}".format(bucket, name)
-    dest_path = os.environ["dest_path"]
+    input_pattern = os.environ["input_pattern"]
+    # source_path = "gs://{}/{}".format(bucket, name)
+    # dest_path = os.environ["dest_path"]
     template_body = {
         "launchParameter": {
             #Details: "JobName invalid; the name must consist of only the characters [-a-z0-9], starting with a letter and ending with a letter or number">
             "jobName": job_name,
             "parameters": {
-                "source_path": source_path,
-                "dest_path": dest_path,
+                "input_pattern": input_pattern,
+                # "dest_path": dest_path,
             },
             "environment": {
                 "tempLocation": temp_bucket,
