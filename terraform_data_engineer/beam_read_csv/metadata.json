@@ -1,0 +1,12 @@
+{
+    "name": "read csv file",
+    "description": "read csv file",
+    "parameters": [
+      {
+        "name": "input_pattern",
+        "label": "GS input pattern",
+        "helpText": "Gs input pattern"
+      }
+      
+    ]
+  }
