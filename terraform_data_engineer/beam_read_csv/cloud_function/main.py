@@ -6,7 +6,7 @@ import os
 #trigger function command: gsutil cp terraform_data_engineer/data/test_data.csv gs://fce2845e810918fb-gcf-trigger-bucket/
 @functions_framework.cloud_event
 def dataflow_trigger(cloud_event):
-    print("this is a test change")
+    print("this is a test change ver 2")
     data = cloud_event.data
 
     event_id = cloud_event["id"]
