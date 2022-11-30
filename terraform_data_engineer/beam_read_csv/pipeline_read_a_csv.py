@@ -32,6 +32,7 @@ def run(
     dest_bucket: str,
     beam_args: List[str] = None
 ) -> None:
+    print("beam_args: ", beam_args)
     options = PipelineOptions(beam_args, save_main_session=True, streaming=False)
     #build your pipeline here
     with beam.Pipeline(options=options) as pipeline:
