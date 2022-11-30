@@ -39,7 +39,7 @@ def run(
             | 'Read files' >> beam.io.ReadFromText(input_pattern)
             # | 'Print contents' >> beam.Map(print)
             | 'Write to files' >> beam.io.WriteToText(
-            file_path_prefix=dest_bucket,
+            file_path_prefix="{}data".format(dest_bucket),
             file_name_suffix=".csv"
             )
         )
