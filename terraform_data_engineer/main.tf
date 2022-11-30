@@ -190,59 +190,59 @@ resource "google_project_iam_member" "dataflow_admin" {
 
 
 ######################################cloud function config
-#create cloud function
-resource "google_cloudfunctions2_function" "function" {
-  depends_on = [
-    google_project_iam_member.event_receiving,
-    google_project_iam_member.artifactregistry_reader,
-  ]
-  name        = "dataflow-trigger"
-  location    = var.region
-  description = "trigger dataflow job to move cloud storage object from src to dest bucket"
+# #create cloud function
+# resource "google_cloudfunctions2_function" "function" {
+#   depends_on = [
+#     google_project_iam_member.event_receiving,
+#     google_project_iam_member.artifactregistry_reader,
+#   ]
+#   name        = "dataflow-trigger"
+#   location    = var.region
+#   description = "trigger dataflow job to move cloud storage object from src to dest bucket"
 
-  build_config {
-    runtime     = var.runtime
-    entry_point = var.entry_point # Set the entry point in the code
-    environment_variables = {
-      BUILD_CONFIG_TEST = "build_test"
-    }
-    source {
-      storage_source {
-        bucket = google_storage_bucket.source_bucket.name
-        object = google_storage_bucket_object.object.name
-      }
-    }
-  }
+#   build_config {
+#     runtime     = var.runtime
+#     entry_point = var.entry_point # Set the entry point in the code
+#     environment_variables = {
+#       BUILD_CONFIG_TEST = "build_test"
+#     }
+#     source {
+#       storage_source {
+#         bucket = google_storage_bucket.source_bucket.name
+#         object = google_storage_bucket_object.object.name
+#       }
+#     }
+#   }
 
-  service_config {
-    max_instance_count = 3
-    min_instance_count = 1
-    available_memory   = "256M"
-    timeout_seconds    = 60
-    environment_variables = {
-      PROJECT_ID = data.google_project.project.project_id,
-      template_path = "gs://${google_storage_bucket.templates_bucket.name}/${data.google_storage_bucket_object.dataflow_template.name}"
-      LOCATION = var.region
-      stagging_bucket = "gs://${google_storage_bucket.stagging_bucket.name}"
-      temp_bucket = "gs://${google_storage_bucket.temp_bucket.name}"
-      dest_path = "gs://${google_storage_bucket.dest_bucket.name}"
-    }
-    ingress_settings               = "ALLOW_INTERNAL_ONLY"
-    all_traffic_on_latest_revision = true
-    service_account_email          = google_service_account.account.email
-  }
+#   service_config {
+#     max_instance_count = 3
+#     min_instance_count = 1
+#     available_memory   = "256M"
+#     timeout_seconds    = 60
+#     environment_variables = {
+#       PROJECT_ID = data.google_project.project.project_id,
+#       template_path = "gs://${google_storage_bucket.templates_bucket.name}/${data.google_storage_bucket_object.dataflow_template.name}"
+#       LOCATION = var.region
+#       stagging_bucket = "gs://${google_storage_bucket.stagging_bucket.name}"
+#       temp_bucket = "gs://${google_storage_bucket.temp_bucket.name}"
+#       dest_path = "gs://${google_storage_bucket.dest_bucket.name}"
+#     }
+#     ingress_settings               = "ALLOW_INTERNAL_ONLY"
+#     all_traffic_on_latest_revision = true
+#     service_account_email          = google_service_account.account.email
+#   }
 
-  event_trigger {
-    trigger_region        = var.region # The trigger must be in the same location as the bucket
-    event_type            = var.gcs_event
-    retry_policy          = "RETRY_POLICY_RETRY"
-    service_account_email = google_service_account.account.email
-    event_filters {
-      attribute = "bucket"
-      value     = google_storage_bucket.trigger_bucket.name
-    }
-  }
-}
+#   event_trigger {
+#     trigger_region        = var.region # The trigger must be in the same location as the bucket
+#     event_type            = var.gcs_event
+#     retry_policy          = "RETRY_POLICY_RETRY"
+#     service_account_email = google_service_account.account.email
+#     event_filters {
+#       attribute = "bucket"
+#       value     = google_storage_bucket.trigger_bucket.name
+#     }
+#   }
+# }
 
 ############################################dataflow config
 #allow service account run by cloud function to run dataflow
@@ -250,6 +250,13 @@ resource "google_cloudfunctions2_function" "function" {
 #assign policy to a service account
 data "google_service_account" "worker_sa" {
   account_id = var.worker_sa
+}
+
+#assign roles/storage.admin to worker_sa
+resource "google_project_iam_member" "worker_sa_storage_admin" {
+  project = var.project_id
+  role    = "roles/storage.admin"
+  member  = "serviceAccount:${var.worker_sa}"
 }
 # data "google_iam_policy" "dataflow_impersonation" {
 #   binding {
