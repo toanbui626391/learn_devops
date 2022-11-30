@@ -29,16 +29,18 @@ def dataflow_trigger(cloud_event):
     print("updated: {}".format(updated))
     
     #prepare data to execute job
-    credentials, _ = google.auth.default()
-    print("service_account_email: {}".format(credentials.service_account_email))
+    # credentials, _ = google.auth.default()
+    # print("service_account_email: {}".format(credentials.service_account_email))
     # print()
-    service = build('dataflow', 'v1b3', credentials=credentials)
+    # service = build('dataflow', 'v1b3', credentials=credentials)
+    service = build('dataflow', 'v1b3')
     project_id = os.environ["PROJECT_ID"]
     print("project_id from environment variable: {}".format(project_id))
 
 
     #template_path here
     job_name = os.environ["job_name"]
+    service_account = os.environ["service_account"]
     template_path = os.environ["template_path"] 
     stagging_bucket = os.environ["stagging_bucket"]
     temp_bucket = os.environ["temp_bucket"]
@@ -55,6 +57,7 @@ def dataflow_trigger(cloud_event):
                 "dest_bucket": dest_bucket,
             },
             "environment": {
+                "serviceAccountEmail": service_account,
                 "tempLocation": temp_bucket,
                 "stagingLocation": stagging_bucket
             },
