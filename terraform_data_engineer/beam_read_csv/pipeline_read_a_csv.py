@@ -32,8 +32,9 @@ def run(
     dest_bucket: str,
     beam_args: List[str] = None
 ) -> None:
+    options = PipelineOptions(beam_args, save_main_session=True, streaming=False)
     #build your pipeline here
-    with beam.Pipeline() as pipeline:
+    with beam.Pipeline(options=options) as pipeline:
         (
             pipeline
             | 'Read files' >> beam.io.ReadFromText(input_pattern)
