@@ -11,7 +11,6 @@
 import apache_beam as beam
 # from apache_beam.dataframe.io import read_csv
 from apache_beam.io.filesystem import FileSystem as beam_fs
-from apache_beam.io import fileio
 from apache_beam.options.pipeline_options import PipelineOptions
 import codecs
 import csv
@@ -26,21 +25,22 @@ import argparse
 #command to run pipeline in your local:
     # python3 batch_pipeline.py --source_path="../data/test_data.csv" --dest_path="../data/dest"
 ########################################################## define apache beam pipeline component here
+@beam.ptransform_fn
+@beam.typehints.with_input_types(beam.pvalue.PBegin)
+@beam.typehints.with_output_types(int)
+def Count(pbegin: beam.pvalue.PBegin, n: int) -> beam.PCollection[int]:
+  def count(n: int) -> Iterable[int]:
+    for i in range(n):
+      yield i
 
-def expand_pattern(pattern: str) -> Iterable[str]:
-    # print("pattern: ", pattern)
-    for match_result in beam_fs.match([pattern])[0].metadata_list:
-        yield match_result.path
-
-def read_csv_lines(file_name: str) -> Iterable[Dict[str, str]]:
-    with beam_fs.open(file_name) as f:
-        # Beam reads files as bytes, but csv expects strings,
-        # so we need to decode the bytes into utf-8 strings.
-        for row in csv.DictReader(codecs.iterdecode(f, 'utf-8')):
-            yield dict(row)
+  return (
+      pbegin
+      | 'Create inputs' >> beam.Create([n])
+      | 'Generate elements' >> beam.FlatMap(count)
+  )
 ########################################################## combine apache beam component into complete pipeline here
 def run(
-    input_patterns: str,
+    n: str,
     # dest_path: str,
     beam_args: List[str] = None
 ) -> None:
@@ -49,34 +49,15 @@ def run(
     # input_pattern = [input_pattern]
     # print("input_pattern list: ", input_pattern)
     options = PipelineOptions(flags=[], type_check_additional='all')
-    # print("input_patterns: ", input_patterns)
     with beam.Pipeline(options=options) as pipeline:
-        readable_files = (
+        (
             pipeline
-            | fileio.MatchFiles(input_patterns)
-            | fileio.ReadMatches()
-            | beam.Reshuffle()
+            | f'Count to {n}' >> Count(n)
+            | 'Print elements' >> beam.Map(print)
         )
-        files_and_contents = (
-            readable_files
-            | beam.Map(lambda x: x.read_utf8())
-        )
-        print_content = (
-            files_and_contents
-            | beam.Map(print)
-        )
-        write_to_file = (
-            files_and_contents
-            | beam.io.WriteToText(
-            file_path_prefix="terraform_data_engineer/data/dest/",
-            file_name_suffix=".csv"
-            )
-        )
-
 
 ############################################################ main program
-#shell script will treat "terraform_data_engineer/"
-#python3 terraform_data_engineer/beam_read_csv/pipeline_read_csv.py --input_pattern "terraform_data_engineer/data/*.csv"
+#python3 terraform_data_engineer/beam_read_csv/pipeline_read_csv.py --input_pattern gs://fce2845e810918fb-gcf-trigger-bucket/*.csv
 if __name__ == "__main__":
     #do not need to init logging instance
     #some test change
@@ -85,15 +66,14 @@ if __name__ == "__main__":
 
     #parse arguments
     parser.add_argument(
-        "--input_patterns",
+        "--n",
         help="an int number"
     )
     #return (namespace, list_of_args)
     args, beam_args = parser.parse_known_args()
-    print("input_pattern: ", args.input_patterns)
-    input_patterns = args.input_patterns
+    # print("input_pattern: ", args.input_pattern)
     run(
-        input_patterns=input_patterns,
+        n=int(args.n),
         # dest_path=args.dest_path,
         beam_args=beam_args
     )

@@ -43,16 +43,16 @@ def dataflow_trigger(cloud_event):
     stagging_bucket = os.environ["stagging_bucket"]
     temp_bucket = os.environ["temp_bucket"]
     location = os.environ["LOCATION"]
-    input_pattern = os.environ["input_pattern"]
-    # source_path = "gs://{}/{}".format(bucket, name)
-    # dest_path = os.environ["dest_path"]
+    # input_pattern = os.environ["input_pattern"]
+    source_path = "gs://{}/{}".format(bucket, name)
+    dest_bucket = os.environ["dest_bucket"]
     template_body = {
         "launchParameter": {
             #Details: "JobName invalid; the name must consist of only the characters [-a-z0-9], starting with a letter and ending with a letter or number">
             "jobName": job_name,
             "parameters": {
-                "input_pattern": input_pattern,
-                # "dest_path": dest_path,
+                "input_pattern": source_path,
+                "dest_bucket": dest_bucket,
             },
             "environment": {
                 "tempLocation": temp_bucket,

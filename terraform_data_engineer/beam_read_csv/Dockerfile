@@ -12,7 +12,7 @@ FROM gcr.io/dataflow-templates-base/python38-template-launcher-base
 #config variable with ENV. variable is reference to container file system (not your local file system)
 ENV FLEX_TEMPLATE_PYTHON_REQUIREMENTS_FILE="/template/requirements.txt"
 #change your pipelie here to change content of docker image build
-ENV FLEX_TEMPLATE_PYTHON_PY_FILE="/template/pipeline_read_csv.py"
+ENV FLEX_TEMPLATE_PYTHON_PY_FILE="/template/pipeline_read_a_csv.py"
 #copy your current directory to /template folder in the container file system
 COPY . /template
 

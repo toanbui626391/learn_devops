@@ -6,7 +6,12 @@
         "name": "input_pattern",
         "label": "GS input pattern",
         "helpText": "Gs input pattern"
+      },
+      {
+        "name": "dest_bucket",
+        "label": "GS dest_bucket",
+        "helpText": "GS destination bucket "
       }
-      
+
     ]
   }
