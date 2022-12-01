@@ -32,6 +32,7 @@ def run(
     dest_bucket: str,
     beam_args: List[str] = None
 ) -> None:
+    #build PipelineOptions object which get from main so that dataflow runner can get correct config
     print("beam_args: ", beam_args)
     options = PipelineOptions(beam_args, save_main_session=True, streaming=False)
     #build your pipeline here
@@ -64,6 +65,7 @@ if __name__ == "__main__":
         "--dest_bucket",
         help="gs dest bucket"
     )
+    #dataflow will call this file with additional argument. This line will help script to capture additional arguments like runner and stagging job description
     args, beam_args = parser.parse_known_args()
     run(
         input_pattern=args.input_pattern,
