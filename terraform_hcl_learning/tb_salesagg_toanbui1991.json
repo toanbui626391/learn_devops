@@ -1,0 +1,18 @@
+[
+    {
+    "name": "store_id",
+    "type": "STRING"
+    },
+    {
+    "name": "product_category",
+    "type": "STRING"
+    },
+    {
+    "name": "total_quantity",
+    "type": "NUMERIC"
+    },
+    {
+    "name": "profit",
+    "type": "NUMERIC"
+    }
+]
