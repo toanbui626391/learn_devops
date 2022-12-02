@@ -26,7 +26,7 @@ parent = transfer_client.common_project_path(project_id)
 
 transfer_config = bigquery_datatransfer.TransferConfig(
     destination_dataset_id=dataset_id,
-    display_name="Your Scheduled Query Name",
+    display_name="scheduled_query_toanbui1991",
     data_source_id="scheduled_query",
     params={
         "query": query_string,
@@ -34,7 +34,7 @@ transfer_config = bigquery_datatransfer.TransferConfig(
         "write_disposition": "WRITE_TRUNCATE",
         "partitioning_field": "",
     },
-    schedule="every day 01:00",
+    schedule="every day 1:00",
 )
 
 transfer_config = transfer_client.create_transfer_config(

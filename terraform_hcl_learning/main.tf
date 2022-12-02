@@ -260,19 +260,24 @@ resource "google_bigquery_table" "salesagg_toanbui1991" {
 
 }
 
-# resource "google_bigquery_data_transfer_config" "schedule_query" {
+resource "google_bigquery_data_transfer_config" "schedule_query" {
 
-#   display_name           = "schedule_query"
-#   location               = var.location
-#   data_source_id         = "schedule_query_data_source_id"
-#   schedule               = "every day 01:00"
-#   destination_dataset_id = google_bigquery_dataset.ds_toanbui1991.id
-#   params = {
-#     destination_table_name_template = "my_table"
-#     write_disposition               = "WRITE_TRUNCATE"
-#     query                           = file("./sale_agg.sql")
-#   }
-# }
+  display_name           = "toanbui1991-sq"
+  location               = var.location
+  # type of supported data transfer:
+    # https://cloud.google.com/bigquery/docs/reference/bq-cli-reference#mk-transfer-config
+    # in this case: scheduled_query
+  data_source_id         = "scheduled_query"
+  schedule               = "every day 1:00"
+  destination_dataset_id = google_bigquery_dataset.ds_toanbui1991.dataset_id
+  #have to set service account email to run this daily
+  service_account_name = google_service_account.bq_sq.email
+  params = {
+    destination_table_name_template = "salesagg_toanbui1991"
+    write_disposition               = "WRITE_TRUNCATE"
+    query                           = file("./sale_agg.sql")
+  }
+}
 
 
 
