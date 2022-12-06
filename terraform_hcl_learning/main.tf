@@ -185,6 +185,90 @@ resource "google_bigquery_table" "tb_sales" {
 
 }
 
+resource "google_bigquery_table" "tb_india_sales" {
+  dataset_id = google_bigquery_dataset.ds_toanbui1991.dataset_id
+  table_id   = "india_sales"
+  # expiration_time = 864000000
+  time_partitioning {
+    type = "DAY"
+    expiration_ms = 864000000
+  }
+
+  labels = {
+    env = "data_engineer"
+  }
+
+  schema = file("./tb_sale_schema_v2.json")
+
+  depends_on = [
+    google_bigquery_dataset.ds_toanbui1991
+  ]
+
+}
+
+resource "google_bigquery_table" "tb_europe_sales" {
+  dataset_id = google_bigquery_dataset.ds_toanbui1991.dataset_id
+  table_id   = "europe_sales"
+  # expiration_time = 864000000
+  time_partitioning {
+    type = "DAY"
+    expiration_ms = 864000000
+  }
+
+  labels = {
+    env = "data_engineer"
+  }
+
+  schema = file("./tb_sale_schema_v2.json")
+
+  depends_on = [
+    google_bigquery_dataset.ds_toanbui1991
+  ]
+
+}
+
+resource "google_bigquery_table" "tb_us_sales" {
+  dataset_id = google_bigquery_dataset.ds_toanbui1991.dataset_id
+  table_id   = "us_sales"
+  # expiration_time = 864000000
+  time_partitioning {
+    type = "DAY"
+    expiration_ms = 864000000
+  }
+
+  labels = {
+    env = "data_engineer"
+  }
+
+  schema = file("./tb_sale_schema_v2.json")
+
+  depends_on = [
+    google_bigquery_dataset.ds_toanbui1991
+  ]
+
+}
+
+resource "google_bigquery_table" "tb_australia_sales" {
+  dataset_id = google_bigquery_dataset.ds_toanbui1991.dataset_id
+  table_id   = "australia_sales"
+  # expiration_time = 864000000
+  time_partitioning {
+    type = "DAY"
+    expiration_ms = 864000000
+  }
+
+  labels = {
+    env = "data_engineer"
+  }
+
+  schema = file("./tb_sale_schema_v2.json")
+
+  depends_on = [
+    google_bigquery_dataset.ds_toanbui1991
+  ]
+
+}
+
 #load data into table
 resource "google_bigquery_job" "csv_to_bq" {
   job_id     = "csv_to_bq"
@@ -278,6 +362,159 @@ resource "google_bigquery_data_transfer_config" "schedule_query" {
     query                           = file("./sale_agg.sql")
   }
 }
+###########################################cloud builder config
+#enable cloud build api
+resource "google_project_service" "cloud_build_service" {
+  project = var.project_id
+  service = var.cloud_build_api
+  // Disabling Cloud Composer API might irreversibly break all other
+  // environments in your project.
+  disable_on_destroy = false
+}
+
+resource "google_project_service" "artifactregistry_service" {
+  project = var.project_id
+  service = var.artifactregistry_api
+  // Disabling Cloud Composer API might irreversibly break all other
+  // environments in your project.
+  disable_on_destroy = false
+}
+#cloud buld service account must have storage.admin to push image to artifact registry and build flex template
+resource "google_project_iam_member" "project_cloudbuild" {
+  project = var.project_id
+  role    = "roles/storage.admin"
+  member  = "serviceAccount:${var.cloudbuild_sa}"
+}
+#create source bucket, do not use uniform_bucket_level_access to true, use default value (false). So that we hav acl permission control
+resource "google_storage_bucket" "toanbui1991_source" {
+  name                        = "toanbui1991-source" # Every bucket name must be globally unique
+  location                    = var.location
+  storage_class = var.storage_class
+  versioning {
+    enabled = true
+  }
+
+  lifecycle_rule {
+    condition {
+      age = 30
+    }
+    action {
+      type = "SetStorageClass"
+      storage_class = "NEARLINE"
+    }
+  }
+
+  lifecycle_rule {
+    condition {
+      age = 365
+    }
+    action {
+      type = "Delete"
+    }
+  }
+
+    lifecycle_rule {
+    condition {
+      age = 0
+      num_newer_versions = 7
+    }
+    action {
+      type = "Delete"
+    }
+  }
+
+}
+
+resource "google_storage_bucket" "toanbui1991_destination" {
+  name                        = "toanbui1991-destination" # Every bucket name must be globally unique
+  location                    = var.location
+  storage_class = var.storage_class
+  versioning {
+    enabled = true
+  }
+
+  lifecycle_rule {
+    condition {
+      age = 30
+    }
+    action {
+      type = "SetStorageClass"
+      storage_class = "NEARLINE"
+    }
+  }
+
+  lifecycle_rule {
+    condition {
+      age = 365
+    }
+    action {
+      type = "Delete"
+    }
+  }
+
+    lifecycle_rule {
+    condition {
+      age = 0
+      num_newer_versions = 7
+    }
+    action {
+      type = "Delete"
+    }
+  }
+
+}
+
+
+resource "google_storage_bucket" "toanbui1991_dataflow_templates" {
+  name                        = "toanbui1991-dataflow-templates" # Every bucket name must be globally unique
+  location                    = var.location
+  storage_class = var.storage_class
+  versioning {
+    enabled = true
+  }
+
+  lifecycle_rule {
+    condition {
+      age = 30
+    }
+    action {
+      type = "SetStorageClass"
+      storage_class = "NEARLINE"
+    }
+  }
+
+  lifecycle_rule {
+    condition {
+      age = 365
+    }
+    action {
+      type = "Delete"
+    }
+  }
+
+    lifecycle_rule {
+    condition {
+      age = 0
+      num_newer_versions = 7
+    }
+    action {
+      type = "Delete"
+    }
+  }
+
+}
+
+##################################################dataflow config
+resource "google_project_iam_member" "dataflow_worker_sa_bigquery" {
+  project = var.project_id
+  role    = "roles/bigquery.admin"
+  member  = "serviceAccount:${var.dataflow_worker_sa}"
+
+  
+}
+
+
+
 
 
 

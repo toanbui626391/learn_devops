@@ -1,0 +1,23 @@
+#command to run cloud build: gcloud builds submit --config=cloudbuild.yaml
+#check images: gcloud artifacts docker list
+steps:
+  - name: "gcr.io/cloud-builders/docker"
+    args: ['build', '-t', 'gcr.io/${PROJECT_ID}/dataflow/csv_to_avro:latest', 'beam_pipelines/csv_to_avro/']
+
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: [ 'dataflow', 'flex-template', 'build', 'gs://toanbui1991-dataflow-templates/csv_to_avro.json',
+      '--image', 'gcr.io/$PROJECT_ID/dataflow/csv_to_avro:latest', '--sdk-language', 'PYTHON', '--metadata-file',
+      'beam_pipelines/csv_to_avro/metadata.json' ]
+
+  - name: "gcr.io/cloud-builders/docker"
+    args: ['build', '-t', 'gcr.io/${PROJECT_ID}/dataflow/branching:latest', 'beam_pipelines/branching/']
+
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: [ 'dataflow', 'flex-template', 'build', 'gs://toanbui1991-dataflow-templates/branching.json',
+      '--image', 'gcr.io/$PROJECT_ID/dataflow/branching:latest', '--sdk-language', 'PYTHON', '--metadata-file',
+      'beam_pipelines/branching/metadata.json' ]
+
+
+images:
+  - 'gcr.io/${PROJECT_ID}/dataflow/csv_to_avro:latest'
+  - 'gcr.io/${PROJECT_ID}/dataflow/branching:latest'

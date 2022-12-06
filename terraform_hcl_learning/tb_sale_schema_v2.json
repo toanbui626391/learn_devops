@@ -1,0 +1,22 @@
+[
+    {
+    "name": "name",
+    "type": "STRING"
+    },
+    {
+    "name": "id",
+    "type": "STRING"
+    },
+    {
+    "name": "value",
+    "type": "FLOAT"
+    },
+    {
+    "name": "date",
+    "type": "DATE"
+    },
+    {
+    "name": "location",
+    "type": "STRING"
+    }
+]

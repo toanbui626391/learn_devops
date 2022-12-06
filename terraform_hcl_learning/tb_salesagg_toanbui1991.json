@@ -9,10 +9,10 @@
     },
     {
     "name": "total_quantity",
-    "type": "NUMERIC"
+    "type": "INTEGER"
     },
     {
     "name": "profit",
-    "type": "NUMERIC"
+    "type": "INTEGER"
     }
 ]
