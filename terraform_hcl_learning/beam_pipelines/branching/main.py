@@ -10,7 +10,7 @@ import argparse
 from fastavro import writer, reader, parse_schema
 
 #command to run pipeline in your local:
-    # python3 main.py --input_pattern="gs://dna-poc-training-saurav/avroutput/dpd-00000-of-00001.avro" --dest_bucket="gs://toanbui1991-destination/"
+    # python3 main.py --input_pattern="gs://dna-poc-training-saurav/avroutput/dpd-00000-of-00001.avro"
 #execute beam pipeline in dataflow
     # gcloud dataflow flex-template run $job_name --template-file-gcs-location=$template_path --region=$region --parameters=$parameters --max-workers=$max_workers
 #to check result:
@@ -18,7 +18,6 @@ from fastavro import writer, reader, parse_schema
 ########################################################## combine apache beam component into complete pipeline here
 def run(
     input_pattern: str,
-    dest_bucket: str,
     beam_args: List[str] = None
 ) -> None:
     #build PipelineOptions object which get from main so that dataflow runner can get correct config
@@ -118,14 +117,9 @@ if __name__ == "__main__":
         help="gs source file path"
     )
 
-    parser.add_argument(
-        "--dest_bucket",
-        help="gs dest bucket"
-    )
     #dataflow will call this file with additional argument. This line will help script to capture additional arguments like runner and stagging job description
     args, beam_args = parser.parse_known_args()
     run(
         input_pattern=args.input_pattern,
-        dest_bucket=args.dest_bucket,
         beam_args=beam_args
     )
