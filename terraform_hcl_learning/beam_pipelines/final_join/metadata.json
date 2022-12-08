@@ -1,0 +1,16 @@
+{
+    "name": "apache_beam_final_join",
+    "description": "apache beam final join",
+    "parameters": [
+      {
+        "name": "customer_path",
+        "label": "GS customer path",
+        "helpText": "Gs customer path"
+      },
+      {
+        "name": "transaction_path",
+        "label": "GS customer path",
+        "helpText": "Gs customer path"
+      }
+    ]
+  }

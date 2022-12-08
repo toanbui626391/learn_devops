@@ -1,0 +1,11 @@
+{
+    "name": "apache_beam_branching",
+    "description": "apache beam branching",
+    "parameters": [
+      {
+        "name": "input_pattern",
+        "label": "GS input pattern",
+        "helpText": "Gs input pattern"
+      }
+    ]
+  }
