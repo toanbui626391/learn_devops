@@ -1,2 +1,5 @@
 venv/
 config.py
+.ipynb_checkpoints/
+terraform/.ipynb_checkpoints/
+*.env
