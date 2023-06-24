@@ -1,0 +1,1069 @@
+---
+# Source: datahub/charts/datahub-frontend/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: release-name-datahub-frontend
+  labels:
+    helm.sh/chart: datahub-frontend-0.2.139
+    app.kubernetes.io/name: datahub-frontend
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "v0.10.0"
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: datahub/charts/datahub-gms/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: release-name-datahub-gms
+  labels:
+    helm.sh/chart: datahub-gms-0.2.149
+    app.kubernetes.io/name: datahub-gms
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "v0.10.0"
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: datahub/charts/datahub-frontend/templates/secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: release-name-gms-secret
+  labels:
+    helm.sh/chart: datahub-frontend-0.2.139
+    app.kubernetes.io/name: datahub-frontend
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "v0.10.0"
+    app.kubernetes.io/managed-by: Helm
+type: Opaque
+data:
+  datahub.gms.secret: "b01NMG4zUGNMaA=="
+---
+# Source: datahub/templates/datahub-encryption-secrets.yml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: datahub-encryption-secrets
+type: Opaque
+data:
+  encryption_key_secret: "TFFHOXJzU1dFM3VuRlRFNVh2T0c="
+---
+# Source: datahub/charts/acryl-datahub-actions/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: release-name-acryl-datahub-actions
+  labels:
+    helm.sh/chart: acryl-datahub-actions-0.2.138
+    app.kubernetes.io/name: acryl-datahub-actions
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "0.0.11"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9093
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: acryl-datahub-actions
+    app.kubernetes.io/instance: release-name
+---
+# Source: datahub/charts/datahub-frontend/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: release-name-datahub-frontend
+  labels:
+    helm.sh/chart: datahub-frontend-0.2.139
+    app.kubernetes.io/name: datahub-frontend
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "v0.10.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 9002
+      targetPort: http
+      protocol: TCP
+      name: http
+    - name: jmx
+      port: 4318
+      targetPort: jmx
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: datahub-frontend
+    app.kubernetes.io/instance: release-name
+---
+# Source: datahub/charts/datahub-gms/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: release-name-datahub-gms
+  labels:
+    helm.sh/chart: datahub-gms-0.2.149
+    app.kubernetes.io/name: datahub-gms
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "v0.10.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 8080
+      targetPort: http
+      protocol: TCP
+      name: http
+    - name: jmx
+      port: 4318
+      targetPort: jmx
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: datahub-gms
+    app.kubernetes.io/instance: release-name
+---
+# Source: datahub/charts/acryl-datahub-actions/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: release-name-acryl-datahub-actions
+  labels:
+    helm.sh/chart: acryl-datahub-actions-0.2.138
+    app.kubernetes.io/name: acryl-datahub-actions
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "0.0.11"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: acryl-datahub-actions
+      app.kubernetes.io/instance: release-name
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: acryl-datahub-actions
+        app.kubernetes.io/instance: release-name
+    spec:
+      serviceAccountName: default
+      securityContext:
+        {}
+      volumes:
+      initContainers:
+      containers:
+        - name: acryl-datahub-actions
+          securityContext:
+            {}
+          image: "acryldata/datahub-actions:v0.0.11"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 9093
+              protocol: TCP
+          env:
+            - name: DATAHUB_GMS_HOST
+              value: release-name-datahub-gms
+            - name: DATAHUB_GMS_PORT
+              value: "8080"
+            # Deprecated in favour of DATAHUB_* variables
+            - name: GMS_HOST
+              value: release-name-datahub-gms
+            - name: GMS_PORT
+              value: "8080"
+            - name: KAFKA_BOOTSTRAP_SERVER
+              value: "prerequisites-kafka:9092"
+            - name: SCHEMA_REGISTRY_URL
+              value: http://release-name-datahub-gms:8080/schema-registry/api/
+            - name: KAFKA_AUTO_OFFSET_POLICY
+              value: "latest"
+            - name: METADATA_CHANGE_EVENT_NAME
+              value: MetadataChangeEvent_v4
+            - name: FAILED_METADATA_CHANGE_EVENT_NAME
+              value: FailedMetadataChangeEvent_v4
+            - name: METADATA_AUDIT_EVENT_NAME
+              value: MetadataAuditEvent_v4
+            - name: DATAHUB_USAGE_EVENT_NAME
+              value: DataHubUsageEvent_v1
+            - name: METADATA_CHANGE_PROPOSAL_TOPIC_NAME
+              value: MetadataChangeProposal_v1
+            - name: FAILED_METADATA_CHANGE_PROPOSAL_TOPIC_NAME
+              value: FailedMetadataChangeProposal_v1
+            - name: METADATA_CHANGE_LOG_VERSIONED_TOPIC_NAME
+              value: MetadataChangeLog_Versioned_v1
+            - name: METADATA_CHANGE_LOG_TIMESERIES_TOPIC_NAME
+              value: MetadataChangeLog_Timeseries_v1
+            - name: PLATFORM_EVENT_TOPIC_NAME
+              value: PlatformEvent_v1
+          volumeMounts:
+          resources:
+            limits:
+              memory: 512Mi
+            requests:
+              cpu: 300m
+              memory: 256Mi
+---
+# Source: datahub/charts/datahub-frontend/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: release-name-datahub-frontend
+  labels:
+    helm.sh/chart: datahub-frontend-0.2.139
+    app.kubernetes.io/name: datahub-frontend
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "v0.10.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: datahub-frontend
+      app.kubernetes.io/instance: release-name
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: datahub-frontend
+        app.kubernetes.io/instance: release-name
+    spec:
+      serviceAccountName: release-name-datahub-frontend
+      securityContext:
+        {}
+      volumes:
+      initContainers:
+      containers:
+        - name: datahub-frontend
+          securityContext:
+            {}
+          image: "linkedin/datahub-frontend-react:v0.10.4"
+          imagePullPolicy: IfNotPresent
+          lifecycle:
+            {}
+          ports:
+            - name: http
+              containerPort: 9002
+              protocol: TCP
+            - name: jmx
+              containerPort: 4318
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /admin
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            failureThreshold: 4
+          readinessProbe:
+            httpGet:
+              path: /admin
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            failureThreshold: 4
+          env:
+            - name: ENABLE_PROMETHEUS
+              value: "true"
+            - name: DATAHUB_GMS_HOST
+              value: release-name-datahub-gms
+            - name: DATAHUB_GMS_PORT
+              value: "8080"
+            - name: DATAHUB_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: release-name-gms-secret
+                  key: datahub.gms.secret
+            - name: DATAHUB_APP_VERSION
+              value: "1.0"
+            - name: DATAHUB_PLAY_MEM_BUFFER_SIZE
+              value: "10MB"
+            - name: DATAHUB_ANALYTICS_ENABLED
+              value: "true"
+            - name: KAFKA_BOOTSTRAP_SERVER
+              value: "prerequisites-kafka:9092"
+            - name: ELASTIC_CLIENT_HOST
+              value: "elasticsearch-master"
+            - name: ELASTIC_CLIENT_PORT
+              value: "9200"
+            - name: ELASTIC_CLIENT_USE_SSL
+              value: "false"
+            - name: DATAHUB_TRACKING_TOPIC
+              value: DataHubUsageEvent_v1
+          volumeMounts:
+          resources:
+            limits:
+              memory: 1400Mi
+            requests:
+              cpu: 100m
+              memory: 512Mi
+---
+# Source: datahub/charts/datahub-gms/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: release-name-datahub-gms
+  labels:
+    helm.sh/chart: datahub-gms-0.2.149
+    app.kubernetes.io/name: datahub-gms
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "v0.10.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas:  1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: datahub-gms
+      app.kubernetes.io/instance: release-name
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: datahub-gms
+        app.kubernetes.io/instance: release-name
+    spec:
+      hostAliases:
+        - hostnames:
+          - broker
+          - mysql
+          - elasticsearch
+          - neo4j
+          ip: 192.168.0.104
+      serviceAccountName: release-name-datahub-gms
+      securityContext:
+        {}
+      volumes:
+      initContainers:
+      containers:
+        - name: datahub-gms
+          securityContext:
+            {}
+          image: "linkedin/datahub-gms:v0.10.4"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: jmx
+              containerPort: 4318
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            failureThreshold: 8
+          readinessProbe:
+            httpGet:
+              path: /health/check/ready
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            failureThreshold: 8
+          env:
+            - name: DATAHUB_UPGRADE_HISTORY_KAFKA_CONSUMER_GROUP_ID
+              value: release-name-duhe-consumer-job-client-gms
+            - name: DATAHUB_REVISION
+              value: "1"
+            - name: ENABLE_PROMETHEUS
+              value: "true"
+            - name: MCE_CONSUMER_ENABLED
+              value: "true"
+            - name: MAE_CONSUMER_ENABLED
+              value: "true"
+            - name: PE_CONSUMER_ENABLED
+              value: "true"
+            - name: ENTITY_REGISTRY_CONFIG_PATH
+              value: /datahub/datahub-gms/resources/entity-registry.yml
+            - name: DATAHUB_ANALYTICS_ENABLED
+              value: "true"
+            - name: EBEAN_DATASOURCE_USERNAME
+              value: "root"
+            - name: EBEAN_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "mysql-secrets"
+                  key: "mysql-root-password"
+            - name: EBEAN_DATASOURCE_HOST
+              value: "prerequisites-mysql:3306"
+            - name: EBEAN_DATASOURCE_URL
+              value: "jdbc:mysql://prerequisites-mysql:3306/datahub?verifyServerCertificate=false&useSSL=true&useUnicode=yes&characterEncoding=UTF-8&enabledTLSProtocols=TLSv1.2"
+            - name: EBEAN_DATASOURCE_DRIVER
+              value: "com.mysql.cj.jdbc.Driver"
+            - name: KAFKA_BOOTSTRAP_SERVER
+              value: "prerequisites-kafka:9092"
+            - name: KAFKA_SCHEMAREGISTRY_URL
+              value: http://localhost:8080/schema-registry/api/
+            - name: SCHEMA_REGISTRY_TYPE
+              value: "INTERNAL"
+            - name: ELASTICSEARCH_HOST
+              value: "elasticsearch-master"
+            - name: ELASTICSEARCH_PORT
+              value: "9200"
+            - name: SKIP_ELASTICSEARCH_CHECK
+              value: "false"
+            - name: ELASTICSEARCH_USE_SSL
+              value: "false"
+            - name: GRAPH_SERVICE_IMPL
+              value: elasticsearch
+            - name: METADATA_CHANGE_EVENT_NAME
+              value: MetadataChangeEvent_v4
+            - name: FAILED_METADATA_CHANGE_EVENT_NAME
+              value: FailedMetadataChangeEvent_v4
+            - name: METADATA_AUDIT_EVENT_NAME
+              value: MetadataAuditEvent_v4
+            - name: DATAHUB_USAGE_EVENT_NAME
+              value: DataHubUsageEvent_v1
+            - name: METADATA_CHANGE_PROPOSAL_TOPIC_NAME
+              value: MetadataChangeProposal_v1
+            - name: FAILED_METADATA_CHANGE_PROPOSAL_TOPIC_NAME
+              value: FailedMetadataChangeProposal_v1
+            - name: METADATA_CHANGE_LOG_VERSIONED_TOPIC_NAME
+              value: MetadataChangeLog_Versioned_v1
+            - name: METADATA_CHANGE_LOG_TIMESERIES_TOPIC_NAME
+              value: MetadataChangeLog_Timeseries_v1
+            - name: PLATFORM_EVENT_TOPIC_NAME
+              value: PlatformEvent_v1
+            - name: DATAHUB_UPGRADE_HISTORY_TOPIC_NAME
+              value: DataHubUpgradeHistory_v1
+            - name: UI_INGESTION_ENABLED
+              value: "true"
+            - name: SECRET_SERVICE_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: "datahub-encryption-secrets"
+                  key: "encryption_key_secret"
+            - name: UI_INGESTION_DEFAULT_CLI_VERSION
+              value: "0.10.4"
+            - name: ELASTICSEARCH_QUERY_MAX_TERM_BUCKET_SIZE
+              value: "20"
+            - name: ELASTICSEARCH_QUERY_EXACT_MATCH_EXCLUSIVE
+              value: "false"
+            - name: ELASTICSEARCH_QUERY_EXACT_MATCH_WITH_PREFIX
+              value: "true"
+            - name: ELASTICSEARCH_QUERY_EXACT_MATCH_FACTOR
+              value: "2"
+            - name: ELASTICSEARCH_QUERY_EXACT_MATCH_PREFIX_FACTOR
+              value: "1.6"
+            - name: ELASTICSEARCH_QUERY_EXACT_MATCH_CASE_FACTOR
+              value: "0.7"
+            - name: ELASTICSEARCH_QUERY_EXACT_MATCH_ENABLE_STRUCTURED
+              value: "true"
+            - name: ELASTICSEARCH_SEARCH_GRAPH_TIMEOUT_SECONDS
+              value: "50"
+            - name: ELASTICSEARCH_SEARCH_GRAPH_BATCH_SIZE
+              value: "1000"
+            - name: ELASTICSEARCH_SEARCH_GRAPH_MAX_RESULT
+              value: "10000"
+            - name: SEARCH_SERVICE_ENABLE_CACHE
+              value: "false"
+            - name: LINEAGE_SEARCH_CACHE_ENABLED
+              value: "false"
+            - name: ELASTICSEARCH_INDEX_BUILDER_MAPPINGS_REINDEX
+              value: "true"
+            - name: ELASTICSEARCH_INDEX_BUILDER_SETTINGS_REINDEX
+              value: "true"
+            - name: ALWAYS_EMIT_CHANGE_LOG
+              value: "false"
+            - name: GRAPH_SERVICE_DIFF_MODE_ENABLED
+              value: "true"
+          volumeMounts:
+          resources:
+            limits:
+              memory: 2Gi
+            requests:
+              cpu: 100m
+              memory: 1Gi
+---
+# Source: datahub/templates/datahub-upgrade/datahub-cleanup-job-template.yml
+# Job template for running datahub cleanup
+# Creates a suspended cronJob that you can use to create an adhoc job when ready to run clean up.
+# Run the following command to do so
+# kubectl create job --from=cronjob/<<release-name>>-datahub-cleanup-job-template datahub-cleanup-job
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: release-name-datahub-cleanup-job-template
+  labels:
+    helm.sh/chart: datahub-0.2.175
+    app.kubernetes.io/name: datahub
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "0.10.4"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  schedule: "* * * * *"
+  suspend: true
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          volumes:
+          restartPolicy: Never
+          securityContext:
+            {}
+          initContainers:
+          containers:
+            - name: datahub-upgrade-job
+              image: "acryldata/datahub-upgrade:v0.10.4"
+              imagePullPolicy: IfNotPresent
+              args: [ "-u", "NoCodeDataMigrationCleanup" ]
+              env:
+                - name: ENTITY_REGISTRY_CONFIG_PATH
+                  value: /datahub/datahub-gms/resources/entity-registry.yml
+                - name: DATAHUB_GMS_HOST
+                  value: release-name-datahub-gms
+                - name: DATAHUB_GMS_PORT
+                  value: "8080"
+                - name: DATAHUB_MAE_CONSUMER_HOST
+                  value: release-name-datahub-mae-consumer
+                - name: DATAHUB_MAE_CONSUMER_PORT
+                  value: "9091"
+                - name: EBEAN_DATASOURCE_USERNAME
+                  value: "root"
+                - name: EBEAN_DATASOURCE_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: "mysql-secrets"
+                      key: "mysql-root-password"
+                - name: EBEAN_DATASOURCE_HOST
+                  value: "prerequisites-mysql:3306"
+                - name: EBEAN_DATASOURCE_URL
+                  value: "jdbc:mysql://prerequisites-mysql:3306/datahub?verifyServerCertificate=false&useSSL=true&useUnicode=yes&characterEncoding=UTF-8&enabledTLSProtocols=TLSv1.2"
+                - name: EBEAN_DATASOURCE_DRIVER
+                  value: "com.mysql.cj.jdbc.Driver"
+                - name: KAFKA_BOOTSTRAP_SERVER
+                  value: "prerequisites-kafka:9092"
+                - name: KAFKA_SCHEMAREGISTRY_URL
+                  value: http://release-name-datahub-gms:8080/schema-registry/api/
+                - name: ELASTICSEARCH_HOST
+                  value: "elasticsearch-master"
+                - name: ELASTICSEARCH_PORT
+                  value: "9200"
+                - name: SKIP_ELASTICSEARCH_CHECK
+                  value: "false"
+                - name: ELASTICSEARCH_INSECURE
+                  value: "false"
+                - name: ELASTICSEARCH_USE_SSL
+                  value: "false"
+                - name: GRAPH_SERVICE_IMPL
+                  value: elasticsearch
+                - name: METADATA_CHANGE_EVENT_NAME
+                  value: MetadataChangeEvent_v4
+                - name: FAILED_METADATA_CHANGE_EVENT_NAME
+                  value: FailedMetadataChangeEvent_v4
+                - name: METADATA_AUDIT_EVENT_NAME
+                  value: MetadataAuditEvent_v4
+                - name: METADATA_CHANGE_PROPOSAL_TOPIC_NAME
+                  value: MetadataChangeProposal_v1
+                - name: FAILED_METADATA_CHANGE_PROPOSAL_TOPIC_NAME
+                  value: FailedMetadataChangeProposal_v1
+                - name: METADATA_CHANGE_LOG_VERSIONED_TOPIC_NAME
+                  value: MetadataChangeLog_Versioned_v1
+                - name: METADATA_CHANGE_LOG_TIMESERIES_TOPIC_NAME
+                  value: MetadataChangeLog_Timeseries_v1
+                - name: DATAHUB_UPGRADE_HISTORY_TOPIC_NAME
+                  value: DataHubUpgradeHistory_v1
+              securityContext:
+                {}
+              volumeMounts:
+              resources:
+                limits:
+                  cpu: 500m
+                  memory: 512Mi
+                requests:
+                  cpu: 300m
+                  memory: 256Mi
+---
+# Source: datahub/templates/datahub-upgrade/datahub-restore-indices-job-template.yml
+# Job template for restoring indices by sending MAE corresponding to all entities in the local db
+# Creates a suspended cronJob that you can use to create an adhoc job when ready to run clean up.
+# Run the following command to do so
+# kubectl create job --from=cronjob/<<release-name>>-datahub-restore-indices-job-template datahub-restore-indices-job
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: release-name-datahub-restore-indices-job-template
+  labels:
+    helm.sh/chart: datahub-0.2.175
+    app.kubernetes.io/name: datahub
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "0.10.4"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  schedule: "* * * * *"
+  suspend: true
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          volumes:
+          restartPolicy: Never
+          securityContext:
+            {}
+          initContainers:
+          containers:
+            - name: datahub-upgrade-job
+              image: "acryldata/datahub-upgrade:v0.10.4"
+              imagePullPolicy: IfNotPresent
+              args:
+                - "-u"
+                - "RestoreIndices"
+                - "-a"
+                - "batchSize=1000"
+                - "-a"
+                - "batchDelayMs=100"
+              env:
+                - name: ENTITY_REGISTRY_CONFIG_PATH
+                  value: /datahub/datahub-gms/resources/entity-registry.yml
+                - name: DATAHUB_GMS_HOST
+                  value: release-name-datahub-gms
+                - name: DATAHUB_GMS_PORT
+                  value: "8080"
+                - name: DATAHUB_MAE_CONSUMER_HOST
+                  value: release-name-datahub-mae-consumer
+                - name: DATAHUB_MAE_CONSUMER_PORT
+                  value: "9091"
+                - name: EBEAN_DATASOURCE_USERNAME
+                  value: "root"
+                - name: EBEAN_DATASOURCE_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: "mysql-secrets"
+                      key: "mysql-root-password"
+                - name: EBEAN_DATASOURCE_HOST
+                  value: "prerequisites-mysql:3306"
+                - name: EBEAN_DATASOURCE_URL
+                  value: "jdbc:mysql://prerequisites-mysql:3306/datahub?verifyServerCertificate=false&useSSL=true&useUnicode=yes&characterEncoding=UTF-8&enabledTLSProtocols=TLSv1.2"
+                - name: EBEAN_DATASOURCE_DRIVER
+                  value: "com.mysql.cj.jdbc.Driver"
+                - name: KAFKA_BOOTSTRAP_SERVER
+                  value: "prerequisites-kafka:9092"
+                - name: KAFKA_SCHEMAREGISTRY_URL
+                  value: http://release-name-datahub-gms:8080/schema-registry/api/
+                - name: ELASTICSEARCH_HOST
+                  value: "elasticsearch-master"
+                - name: ELASTICSEARCH_PORT
+                  value: "9200"
+                - name: SKIP_ELASTICSEARCH_CHECK
+                  value: "false"
+                - name: ELASTICSEARCH_INSECURE
+                  value: "false"
+                - name: ELASTICSEARCH_USE_SSL
+                  value: "false"
+                - name: GRAPH_SERVICE_IMPL
+                  value: elasticsearch
+                - name: METADATA_CHANGE_EVENT_NAME
+                  value: MetadataChangeEvent_v4
+                - name: FAILED_METADATA_CHANGE_EVENT_NAME
+                  value: FailedMetadataChangeEvent_v4
+                - name: METADATA_AUDIT_EVENT_NAME
+                  value: MetadataAuditEvent_v4
+                - name: METADATA_CHANGE_PROPOSAL_TOPIC_NAME
+                  value: MetadataChangeProposal_v1
+                - name: FAILED_METADATA_CHANGE_PROPOSAL_TOPIC_NAME
+                  value: FailedMetadataChangeProposal_v1
+                - name: METADATA_CHANGE_LOG_VERSIONED_TOPIC_NAME
+                  value: MetadataChangeLog_Versioned_v1
+                - name: METADATA_CHANGE_LOG_TIMESERIES_TOPIC_NAME
+                  value: MetadataChangeLog_Timeseries_v1
+                - name: DATAHUB_UPGRADE_HISTORY_TOPIC_NAME
+                  value: DataHubUpgradeHistory_v1
+              securityContext:
+                {}
+              volumeMounts:
+              resources:
+                limits:
+                  cpu: 500m
+                  memory: 512Mi
+                requests:
+                  cpu: 300m
+                  memory: 256Mi
+---
+# Source: datahub/templates/datahub-upgrade/datahub-nocode-migration-job.yml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: release-name-nocode-migration-job
+  labels:
+    helm.sh/chart: datahub-0.2.175
+    app.kubernetes.io/name: datahub
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "0.10.4"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    # This is what defines this resource as a hook. Without this line, the
+    # job is considered part of the release.
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "-2"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  template:
+    spec:
+      volumes:
+      restartPolicy: Never
+      securityContext:
+        {}
+      initContainers:
+      containers:
+        - name: datahub-upgrade-job
+          image: "acryldata/datahub-upgrade:v0.10.4"
+          imagePullPolicy: IfNotPresent
+          args:
+            - "-u"
+            - "NoCodeDataMigration"
+            - "-a"
+            - "batchSize=1000"
+            - "-a"
+            - "batchDelayMs=100"
+            - "-a"
+            - "dbType=MYSQL"
+          env:
+            - name: ENTITY_REGISTRY_CONFIG_PATH
+              value: /datahub/datahub-gms/resources/entity-registry.yml
+            - name: DATAHUB_GMS_HOST
+              value: release-name-datahub-gms
+            - name: DATAHUB_GMS_PORT
+              value: "8080"
+            - name: DATAHUB_MAE_CONSUMER_HOST
+              value: release-name-datahub-mae-consumer
+            - name: DATAHUB_MAE_CONSUMER_PORT
+              value: "9091"
+            - name: EBEAN_DATASOURCE_USERNAME
+              value: "root"
+            - name: EBEAN_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "mysql-secrets"
+                  key: "mysql-root-password"
+            - name: EBEAN_DATASOURCE_HOST
+              value: "prerequisites-mysql:3306"
+            - name: EBEAN_DATASOURCE_URL
+              value: "jdbc:mysql://prerequisites-mysql:3306/datahub?verifyServerCertificate=false&useSSL=true&useUnicode=yes&characterEncoding=UTF-8&enabledTLSProtocols=TLSv1.2"
+            - name: EBEAN_DATASOURCE_DRIVER
+              value: "com.mysql.cj.jdbc.Driver"
+            - name: KAFKA_BOOTSTRAP_SERVER
+              value: "prerequisites-kafka:9092"
+            - name: KAFKA_SCHEMAREGISTRY_URL
+              value: http://release-name-datahub-gms:8080/schema-registry/api/
+            - name: ELASTICSEARCH_HOST
+              value: "elasticsearch-master"
+            - name: ELASTICSEARCH_PORT
+              value: "9200"
+            - name: SKIP_ELASTICSEARCH_CHECK
+              value: "false"
+            - name: ELASTICSEARCH_INSECURE
+              value: "false"
+            - name: ELASTICSEARCH_USE_SSL
+              value: "false"
+            - name: GRAPH_SERVICE_IMPL
+              value: elasticsearch
+            - name: METADATA_CHANGE_EVENT_NAME
+              value: MetadataChangeEvent_v4
+            - name: FAILED_METADATA_CHANGE_EVENT_NAME
+              value: FailedMetadataChangeEvent_v4
+            - name: METADATA_AUDIT_EVENT_NAME
+              value: MetadataAuditEvent_v4
+            - name: METADATA_CHANGE_PROPOSAL_TOPIC_NAME
+              value: MetadataChangeProposal_v1
+            - name: FAILED_METADATA_CHANGE_PROPOSAL_TOPIC_NAME
+              value: FailedMetadataChangeProposal_v1
+            - name: METADATA_CHANGE_LOG_VERSIONED_TOPIC_NAME
+              value: MetadataChangeLog_Versioned_v1
+            - name: METADATA_CHANGE_LOG_TIMESERIES_TOPIC_NAME
+              value: MetadataChangeLog_Timeseries_v1
+            - name: DATAHUB_UPGRADE_HISTORY_TOPIC_NAME
+              value: DataHubUpgradeHistory_v1
+          securityContext:
+            {}
+          volumeMounts:
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 300m
+              memory: 256Mi
+---
+# Source: datahub/templates/datahub-upgrade/datahub-system-update-job.yml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: release-name-datahub-system-update-job
+  labels:
+    helm.sh/chart: datahub-0.2.175
+    app.kubernetes.io/name: datahub
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "0.10.4"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    # This is what defines this resource as a hook. Without this line, the
+    # job is considered part of the release.
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-4"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  template:
+    spec:
+      volumes:
+      restartPolicy: Never
+      securityContext:
+        {}
+      initContainers:
+      containers:
+        - name: datahub-system-update-job
+          image: "acryldata/datahub-upgrade:v0.10.4"
+          imagePullPolicy: IfNotPresent
+          args:
+            - "-u"
+            - "SystemUpdate"
+          env:
+            - name: DATAHUB_REVISION
+              value: "1"
+            - name: ENTITY_REGISTRY_CONFIG_PATH
+              value: /datahub/datahub-gms/resources/entity-registry.yml
+            - name: DATAHUB_GMS_HOST
+              value: release-name-datahub-gms
+            - name: DATAHUB_GMS_PORT
+              value: "8080"
+            - name: DATAHUB_MAE_CONSUMER_HOST
+              value: release-name-datahub-mae-consumer
+            - name: DATAHUB_MAE_CONSUMER_PORT
+              value: "9091"
+            - name: EBEAN_DATASOURCE_USERNAME
+              value: "root"
+            - name: EBEAN_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "mysql-secrets"
+                  key: "mysql-root-password"
+            - name: EBEAN_DATASOURCE_HOST
+              value: "prerequisites-mysql:3306"
+            - name: EBEAN_DATASOURCE_URL
+              value: "jdbc:mysql://prerequisites-mysql:3306/datahub?verifyServerCertificate=false&useSSL=true&useUnicode=yes&characterEncoding=UTF-8&enabledTLSProtocols=TLSv1.2"
+            - name: EBEAN_DATASOURCE_DRIVER
+              value: "com.mysql.cj.jdbc.Driver"
+            - name: KAFKA_BOOTSTRAP_SERVER
+              value: "prerequisites-kafka:9092"
+            - name: KAFKA_SCHEMAREGISTRY_URL
+              value: http://release-name-datahub-gms:8080/schema-registry/api/
+            - name: ELASTICSEARCH_HOST
+              value: "elasticsearch-master"
+            - name: ELASTICSEARCH_PORT
+              value: "9200"
+            - name: SKIP_ELASTICSEARCH_CHECK
+              value: "false"
+            - name: ELASTICSEARCH_INSECURE
+              value: "false"
+            - name: ELASTICSEARCH_USE_SSL
+              value: "false"
+            - name: GRAPH_SERVICE_IMPL
+              value: elasticsearch
+            - name: METADATA_CHANGE_EVENT_NAME
+              value: MetadataChangeEvent_v4
+            - name: FAILED_METADATA_CHANGE_EVENT_NAME
+              value: FailedMetadataChangeEvent_v4
+            - name: METADATA_AUDIT_EVENT_NAME
+              value: MetadataAuditEvent_v4
+            - name: METADATA_CHANGE_PROPOSAL_TOPIC_NAME
+              value: MetadataChangeProposal_v1
+            - name: FAILED_METADATA_CHANGE_PROPOSAL_TOPIC_NAME
+              value: FailedMetadataChangeProposal_v1
+            - name: METADATA_CHANGE_LOG_VERSIONED_TOPIC_NAME
+              value: MetadataChangeLog_Versioned_v1
+            - name: METADATA_CHANGE_LOG_TIMESERIES_TOPIC_NAME
+              value: MetadataChangeLog_Timeseries_v1
+            - name: DATAHUB_UPGRADE_HISTORY_TOPIC_NAME
+              value: DataHubUpgradeHistory_v1
+            - name: DATAHUB_ANALYTICS_ENABLED
+              value: "true"
+            - name: SCHEMA_REGISTRY_SYSTEM_UPDATE
+              value: "true"
+            - name: SPRING_KAFKA_PROPERTIES_AUTO_REGISTER_SCHEMAS
+              value: "false"
+            - name: SPRING_KAFKA_PROPERTIES_USE_LATEST_VERSION
+              value: "true"
+            - name: SCHEMA_REGISTRY_TYPE
+              value: "INTERNAL"
+            - name: ELASTICSEARCH_BUILD_INDICES_CLONE_INDICES
+              value: "true"
+            - name: ELASTICSEARCH_INDEX_BUILDER_MAPPINGS_REINDEX
+              value: "true"
+            - name: ELASTICSEARCH_INDEX_BUILDER_SETTINGS_REINDEX
+              value: "true"
+          securityContext:
+            {}
+          volumeMounts:
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 300m
+              memory: 256Mi
+---
+# Source: datahub/templates/elasticsearch-setup-job.yml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: release-name-elasticsearch-setup-job
+  labels:
+    helm.sh/chart: datahub-0.2.175
+    app.kubernetes.io/name: datahub
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "0.10.4"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    # This is what defines this resource as a hook. Without this line, the
+    # job is considered part of the release.
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  template:
+    spec:
+      volumes:
+      restartPolicy: Never
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: elasticsearch-setup-job
+          image: "linkedin/datahub-elasticsearch-setup:v0.10.4"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: ELASTICSEARCH_HOST
+              value: "elasticsearch-master"
+            - name: ELASTICSEARCH_PORT
+              value: "9200"
+            - name: SKIP_ELASTICSEARCH_CHECK
+              value: "false"
+            - name: ELASTICSEARCH_INSECURE
+              value: "false"
+            - name: ELASTICSEARCH_USE_SSL
+              value: "false"
+            - name: DATAHUB_ANALYTICS_ENABLED
+              value: "true"
+          securityContext:
+            runAsUser: 1000
+          volumeMounts:
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 300m
+              memory: 256Mi
+---
+# Source: datahub/templates/kafka-setup-job.yml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: release-name-kafka-setup-job
+  labels:
+    helm.sh/chart: datahub-0.2.175
+    app.kubernetes.io/name: datahub
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "0.10.4"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    # This is what defines this resource as a hook. Without this line, the
+    # job is considered part of the release.
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      securityContext:
+        fsGroup: 1000
+      volumes:
+      containers:
+        - name: kafka-setup-job
+          image: "linkedin/datahub-kafka-setup:v0.10.4"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: KAFKA_ZOOKEEPER_CONNECT
+              value: "prerequisites-zookeeper:2181"
+            - name: KAFKA_BOOTSTRAP_SERVER
+              value: "prerequisites-kafka:9092"
+            - name: USE_CONFLUENT_SCHEMA_REGISTRY
+              value: "false"
+            - name: METADATA_CHANGE_EVENT_NAME
+              value: MetadataChangeEvent_v4
+            - name: FAILED_METADATA_CHANGE_EVENT_NAME
+              value: FailedMetadataChangeEvent_v4
+            - name: METADATA_AUDIT_EVENT_NAME
+              value: MetadataAuditEvent_v4
+            - name: DATAHUB_USAGE_EVENT_NAME
+              value: DataHubUsageEvent_v1
+            - name: METADATA_CHANGE_PROPOSAL_TOPIC_NAME
+              value: MetadataChangeProposal_v1
+            - name: FAILED_METADATA_CHANGE_PROPOSAL_TOPIC_NAME
+              value: FailedMetadataChangeProposal_v1
+            - name: METADATA_CHANGE_LOG_VERSIONED_TOPIC_NAME
+              value: MetadataChangeLog_Versioned_v1
+            - name: METADATA_CHANGE_LOG_TIMESERIES_TOPIC_NAME
+              value: MetadataChangeLog_Timeseries_v1
+            - name: PLATFORM_EVENT_TOPIC_NAME
+              value: PlatformEvent_v1
+            - name: DATAHUB_UPGRADE_HISTORY_TOPIC_NAME
+              value: DataHubUpgradeHistory_v1
+          securityContext:
+            runAsUser: 1000
+          volumeMounts:
+          resources:
+            limits:
+              cpu: 500m
+              memory: 1024Mi
+            requests:
+              cpu: 300m
+              memory: 768Mi
+---
+# Source: datahub/templates/mysql-setup-job.yml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: release-name-mysql-setup-job
+  labels:
+    helm.sh/chart: datahub-0.2.175
+    app.kubernetes.io/name: datahub
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "0.10.4"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    # This is what defines this resource as a hook. Without this line, the
+    # job is considered part of the release.
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  template:
+    spec:
+      volumes:
+      restartPolicy: Never
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: mysql-setup-job
+          image: "acryldata/datahub-mysql-setup:v0.10.4"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MYSQL_USERNAME
+              value: "root"
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "mysql-secrets"
+                  key: "mysql-root-password"
+            - name: MYSQL_HOST
+              value: "prerequisites-mysql"
+            - name: MYSQL_PORT
+              value: "3306"
+          securityContext:
+            runAsUser: 1000
+          volumeMounts:
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 300m
+              memory: 256Mi
