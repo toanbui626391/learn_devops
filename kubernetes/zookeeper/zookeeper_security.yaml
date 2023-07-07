@@ -96,7 +96,7 @@ spec:
     app.kubernetes.io/instance: minikube-zookeeper
     app.kubernetes.io/component: zookeeper
 ---
-# Source: zookeeper/templates/statefulset.yaml, test
+# Source: zookeeper/templates/statefulset.yaml
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -150,34 +150,18 @@ spec:
           
       securityContext:
         fsGroup: 1001
+        runAsUser: 1001
+        runAsGroup: 1001
       initContainers:
-        - name: volume-permissions
-          image: docker.io/bitnami/bitnami-shell:11-debian-11-r127
-          imagePullPolicy: "IfNotPresent"
-          command:
-            - /bin/bash
-          args:
-            - -ec
-            - |
-              mkdir -p /bitnami/zookeeper
-              chown -R 1001:1001 /bitnami/zookeeper
-              find /bitnami/zookeeper -mindepth 1 -maxdepth 1 -not -name ".snapshot" -not -name "lost+found" | xargs -r chown -R 1001:1001
-          securityContext:
-            runAsUser: 0
-          resources:
-            limits: {}
-            requests: {}
-          volumeMounts:
-            - name: data
-              mountPath: /bitnami/zookeeper
       containers:
         - name: zookeeper
-          image: docker.io/bitnami/zookeeper:3.8.1-debian-11-r46
+          image: anz-zookeeper:3.8.1
           imagePullPolicy: "IfNotPresent"
           securityContext:
             allowPrivilegeEscalation: false
             runAsNonRoot: true
             runAsUser: 1001
+            runAsGroup: 1001
           command:
             - /scripts/setup.sh
           resources:
