@@ -1,4 +1,4 @@
-#command to run cloud build: gcloud builds submit --config=cloudbuild.yaml
+#command to run cloud build: gcloud builds submit --config=cloudbuild.yaml --substitutions 
 #check images: gcloud artifacts docker list
 steps:
   - name: "gcr.io/cloud-builders/docker"

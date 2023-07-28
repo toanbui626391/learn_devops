@@ -1,0 +1,5902 @@
+---
+# Source: jfrog-platform/charts/pipelines/templates/pipelines-networkpolicy.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: jfrog-pipelines--networkpolicy
+  labels:
+    helm.sh/chart: pipelines-101.40.5
+    app.kubernetes.io/name: pipelines
+    app.kubernetes.io/instance: jfrog
+    app.kubernetes.io/version: "1.40.5"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: pipelines
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - {}
+  egress:
+  - {}
+---
+# Source: jfrog-platform/charts/xray/templates/xray-resourcequota.yaml
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  labels:
+    app: xray
+    chart: xray-103.76.7
+    release: "jfrog"
+    heritage: "Helm"
+  name: jfrog-xray
+spec:
+  hard:
+    count/jobs.batch: 100
+---
+# Source: jfrog-platform/charts/artifactory/templates/nginx-pdb.yaml
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: jfrog-artifactory-nginx
+  labels:
+    app: artifactory
+    chart: artifactory-107.59.11
+    component: nginx
+    heritage: Helm
+    release: jfrog
+spec:
+  selector:
+    matchLabels:
+      component: nginx
+      app: artifactory
+      release: jfrog
+  minAvailable: 0
+---
+# Source: jfrog-platform/charts/pipelines/charts/vault/templates/server-serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vault
+  namespace: default
+  labels:
+    helm.sh/chart: vault-0.16.1
+    app.kubernetes.io/name: vault
+    app.kubernetes.io/instance: jfrog
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: jfrog-platform/charts/rabbitmq/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: jfrog-rabbitmq
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: rabbitmq
+    helm.sh/chart: rabbitmq-11.9.3
+    app.kubernetes.io/instance: jfrog
+    app.kubernetes.io/managed-by: Helm
+automountServiceAccountToken: true
+secrets:
+  - name: jfrog-rabbitmq
+---
+# Source: jfrog-platform/charts/artifactory/templates/artifactory-access-config.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: jfrog-artifactory-access-config
+  labels:
+    app: artifactory
+    chart: artifactory-107.59.11
+    heritage: Helm
+    release: jfrog
+type: Opaque
+stringData:
+  access.config.patch.yml: |
+    security:
+      tls: false
+---
+# Source: jfrog-platform/charts/artifactory/templates/artifactory-binarystore-secret.yaml
+kind: Secret
+apiVersion: v1
+metadata:
+  name: jfrog-artifactory-binarystore
+  labels:
+    app: artifactory
+    chart: artifactory-107.59.11
+    heritage: Helm
+    release: jfrog
+stringData:
+  binarystore.xml: |-
+    <!-- File system filestore -->
+    <config version="v1">
+        <chain> <!--template="file-system"-->
+                <provider id="file-system" type="file-system"/>
+        </chain>
+    </config>
+---
+# Source: jfrog-platform/charts/artifactory/templates/artifactory-database-secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: jfrog-artifactory-database-creds
+  labels:
+    app: artifactory
+    chart: artifactory-107.59.11
+    heritage: Helm
+    release: jfrog
+type: Opaque
+data:
+  db-url: "amRiYzpwb3N0Z3Jlc3FsOi8vamZyb2ctcG9zdGdyZXNxbDo1NDMyL2FydGlmYWN0b3J5P3NzbG1vZGU9ZGlzYWJsZQ=="
+  db-user: "YXJ0aWZhY3Rvcnk="
+  db-password: "YXJ0aWZhY3Rvcnk="
+---
+# Source: jfrog-platform/charts/artifactory/templates/artifactory-secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: jfrog-artifactory
+  labels:
+    app: artifactory
+    chart: artifactory-107.59.11
+    heritage: Helm
+    release: jfrog
+type: Opaque
+data:
+  master-key: "YmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYg=="
+  join-key: "RUVFRUVFRUVFRUVFRUVFRUVFRUVFRUVFRUVFRUVFRUU="
+---
+# Source: jfrog-platform/charts/artifactory/templates/artifactory-system-yaml.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: jfrog-artifactory-systemyaml
+  labels:
+    app: artifactory
+    chart: artifactory-107.59.11
+    heritage: Helm
+    release: jfrog
+type: Opaque
+stringData:
+  system.yaml: |
+    router:
+      serviceRegistry:
+        insecure: false
+    shared:
+      logging:
+        consoleLog:
+          enabled: false
+      extraJavaOpts: >
+        -Dartifactory.graceful.shutdown.max.request.duration.millis=30000
+        -Dartifactory.access.client.max.connections=50
+      database:
+        type: "postgresql"
+        driver: "org.postgresql.Driver"
+    artifactory:
+      database:
+        maxOpenConnections: 80
+      tomcat:
+        maintenanceConnector:
+          port: 8091
+        connector:
+          maxThreads: 200
+          sendReasonPhrase: false
+          extraConfig: acceptCount="100"
+    frontend:
+      session:
+        timeMinutes: "30"
+    access:
+      database:
+        maxOpenConnections: 80
+      tomcat:
+        connector:
+          maxThreads: 50
+          sendReasonPhrase: false
+          extraConfig: acceptCount="100"
+    mc:
+      enabled: true
+      database:
+        maxOpenConnections: 10
+      idgenerator:
+        maxOpenConnections: 2
+      tomcat:
+        connector:
+          maxThreads: 50
+          sendReasonPhrase: false
+          extraConfig: acceptCount="100"
+    metadata:
+      database:
+        maxOpenConnections: 80
+    jfconnect:
+      enabled: true
+---
+# Source: jfrog-platform/charts/artifactory/templates/nginx-certificate-secret.yaml
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/tls
+metadata:
+  name: jfrog-artifactory-nginx-certificate
+  labels:
+    app: artifactory
+    chart: artifactory-107.59.11
+    heritage: Helm
+    release: jfrog
+data:
+  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURWVENDQWoyZ0F3SUJBZ0lSQVBqc2xyMkwvWG1HVkU4SDZvck9JM0F3RFFZSktvWklodmNOQVFFTEJRQXcKR1RFWE1CVUdBMVVFQXhNT1lYSjBhV1poWTNSdmNua3RZMkV3SGhjTk1qTXdOekE0TVRJd056TXpXaGNOTWpRdwpOekEzTVRJd056TXpXakFXTVJRd0VnWURWUVFERXd0aGNuUnBabUZqZEc5eWVUQ0NBU0l3RFFZSktvWklodmNOCkFRRUJCUUFEZ2dFUEFEQ0NBUW9DZ2dFQkFNc09jRWczTVJxTEhSNHJtREtHeUZrVXFWRjVmVkRJbDlkckpFaDcKMXVQaXc2MC94TjgzQnMrQVlrcy81OENsYVFhdzBPY3MzV3N0Z2NFV2ZlRTFtTURKTjU0TVNtaW1yNW43cUNHWgpLdVdCQlBlcmxnQmJVbzNncUp6NUc0NytSV3dCU25hWGEzZTgyNGp5ZTNGYURPQWNGUWd6Z3FzcW5IWE9abnZDCnl3Rk5zRnEvc0wraWNqTmx1M0VGVk1NNndrNHlxY0xXbjZiVTNaN0lHZE5QelZybHdobFJFWjZPL05JQktWcnAKcFRaRm9nUW92Vm1jdFhic2tPd2dza1ZDaXVXRy9salQxdnE2bDk4bUVVWSt5VXBybGZ1SU1SRTlVaGNmV1I1YwpCREV3RzJkYVdlRzRBVnJmOFBtZVRlcjBPZ0lYaFNZWlRvc0pMb3pxZnIvZHJYY0NBd0VBQWFPQm1qQ0JsekFPCkJnTlZIUThCQWY4RUJBTUNCYUF3SFFZRFZSMGxCQll3RkFZSUt3WUJCUVVIQXdFR0NDc0dBUVVGQndNQ01Bd0cKQTFVZEV3RUIvd1FDTUFBd0h3WURWUjBqQkJnd0ZvQVUxMnljNXFzQllOYUJnOTVLcCttWis2cHU4Rnd3TndZRApWUjBSQkRBd0xvSVRZWEowYVdaaFkzUnZjbmt1WkdWbVlYVnNkSUlYWVhKMGFXWmhZM1J2Y25rdVpHVm1ZWFZzCmRDNXpkbU13RFFZSktvWklodmNOQVFFTEJRQURnZ0VCQUc4c1lZT3pQV1FSSW8yVU96bWNzZzgrZWcxeVZaZmwKSUNiS3dVL09peHdDRlNSc1pCZnQxQkNLR1ZhWXlvTnFONjFIajV1TUZNSnBSQmFaT2tuY24xdHJjR0lJaWM2bApFQXd6Q0lVSldTNTJybjVGNGtCZkoybStVVUJmek5ldkZuWnpSVjNjZUJKRnZQL1Z3TVhXTUtYWE45QUswbmk3Ci9vSjViVjNOVzVkNXErSVJ2MElZUWJna2tHcElpQmRlVThEdXZVNlJhclJPbTMyaVB1cmRkZ0crVlZpb3dqbWcKSjFWV2F4MGhyTFREVzdENWhrOEQzNWhjNWVxbFNHMmhIRkhzZW05ejVRRW44RzJNa3g2ZC9vb2hRWXhFMmxiTQoyT2F2NXc4UzMrVUI3bjE3aThaTkhwdlpwUXBHclF6QkllZEFISitaakNnVnZBbU9FS0w2NnpJPQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+  tls.key: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcGdJQkFBS0NBUUVBeXc1d1NEY3hHb3NkSGl1WU1vYklXUlNwVVhsOVVNaVgxMnNrU0h2VzQrTERyVC9FCjN6Y0d6NEJpU3ovbndLVnBCckRRNXl6ZGF5MkJ3Ulo5NFRXWXdNazNuZ3hLYUthdm1mdW9JWmtxNVlFRTk2dVcKQUZ0U2plQ29uUGtianY1RmJBRktkcGRyZDd6YmlQSjdjVm9NNEJ3VkNET0NxeXFjZGM1bWU4TExBVTJ3V3Irdwp2Nkp5TTJXN2NRVlV3enJDVGpLcHd0YWZwdFRkbnNnWjAwL05XdVhDR1ZFUm5vNzgwZ0VwV3VtbE5rV2lCQ2k5CldaeTFkdXlRN0NDeVJVS0s1WWIrV05QVytycVgzeVlSUmo3SlNtdVYrNGd4RVQxU0Z4OVpIbHdFTVRBYloxcFoKNGJnQld0L3crWjVONnZRNkFoZUZKaGxPaXdrdWpPcCt2OTJ0ZHdJREFRQUJBb0lCQVFDNU1jWCtWemdWdVdNcApMU0YyazY4T2IrV3RSVnloM1JGL2kxeGdMM0ppRFdQaUV4TC9jalJuOC9PeUplcThyU0FJMWlMeGROM003b2cxCkRzcG9LSFhVL3JBWEdhYVRvOUxzWWJXS1R5UHNoYXQrSjZSN1ZzOElUeW41WU1sZHRWS2ptdG5MSjNjQWtlSzQKR0UrMXBpZXdEbXl3T2lxbTZnb2c5OHBJZmZTZ2poYXNNRTA4N0FTME9nUlMrSnNZZGVxamkyM01QWFRmQkptVwpZQnVOMFVIdnNWdkhsZTJRUk85SnFVOVNWNElJZDQvT3IxQzFFWitVa3NjbGxWcmZ1Y3FaTGplckpQUWFjaEEyCkNJdWxWVUkxYzV6WHdlNmJZZUZiQkhKTm5xNnJQWFg2THk2ZDhXNlAwSGpEWkpmRW8zRHlQMHhXUTRscWl6UzgKZUt6TnNlaGhBb0dCQU9GL2ZKbzMxVksyNWVnZE90eG8xR0VxZ3lINU5nOUF3YUY2SEhvNUk2TzhYVitvZG1ZQwpYYjZrcndnNC9yakpYYXBRREN2eUxEaUhjcFlNS25rS2RqMXlVTlYwOEl5NzdSRW5TWjg3ZVZnNkxRZGRWR3VECnJ3eDhrcDZUNWVNUVFneUNNVXBjNktxa3lmNTR0bnM1dThneCtQVThTWVpmUFhyeWVGazFFMlVsQW9HQkFPYUYKMlBOYWpRYXRzS3B5V1pqaHZJNWNhczhra05sMnRDc00xVFlMa0crVTBuS0thRStXQTZQWHkrWFhSNUlPTWVQVwpsWituOHBuY2tlNXZoaHgrdldOUWlJcnlVOGZLRysxTmhWL29tMHlwK2g5OHBYY1JFd0Z6SHk2NE83blpvSDlaCmYweHEydWFHOFhpbFZzb0FUZG85c1hCWmxIQllQLzYrbjBRcDRadHJBb0dCQUtsMFpVMTdBYXJiMk45Wi85NmMKUkdVVVRtRGNaeHlGUEQwOWgyTHR4M09HM09CQ3QxNm5EbzF5TWpwS29saDRzaE9IZmU0VVdkak5LSFhMaEt0YgpDa25ZdXhmOWZiczBpYzBuS2ZNbi9XTW9yS2ZwSWNSOXU3RDFlRFVFelcrWnl4aWRTYThwTElyM3RQZXUvT3FUCkV5TTVNbTRQdE96dWEwUVdMQXhWajFLbEFvR0JBSXpyWDYrTU9FL1AyQUtxT3FsaHZZR05iMkhIcWFDMmx2Y0cKTmtSK2wwSU95UU5xSnRBWUZZdVFQTDM1ZDNBS3EyYnJZN1lnMWdaR3R4TDZMQks1UzQ4dHlQcWZucVd3b0pmVgpYdVk5Yk1wVjBtaHpLemQ1UVpRT1N3NmxZeVYrcTBXT2NXcEduQ0IyZDZEWCtoRXNWR3RJY1hNTDM5azVxWTFSCi9FeVFDYkdYQW9HQkFLbnZqTGJWazkwK1JKL05TUGl3bTlmbVBPQ0MwazhZd1l0VjhkSVNrNjFsU21HTHZCR2kKZFlseFgrVjc4Y09sejNiTDVvcmNGUXUwbkQ4UVRMWnRRK0J0RVM5VSszSzlDRTNFWXpneDRBTXFJOUFidjIwZQpzQjlNZS9Zenh3cFJSR000ZllrRGU1MDk0ZkkwdVpQSkZBR0NQMlR1aE5aL2ozVkVzVS9WM2dvMgotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQo=
+---
+# Source: jfrog-platform/charts/distribution/templates/database-secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: jfrog-distribution-database-creds
+  labels:
+    app: distribution
+    chart: distribution-102.18.1
+    release: jfrog
+    heritage: Helm
+    component: distribution
+type: Opaque
+data:
+  db-url: "amRiYzpwb3N0Z3Jlc3FsOi8vamZyb2ctcG9zdGdyZXNxbDo1NDMyL2Rpc3RyaWJ1dGlvbj9zc2xtb2RlPWRpc2FibGU="
+  db-user: "ZGlzdHJpYnV0aW9u"
+  db-password: "ZGlzdHJpYnV0aW9u"
+---
+# Source: jfrog-platform/charts/distribution/templates/distribution-secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: jfrog-distribution
+  labels:
+    app: distribution
+    chart: distribution-102.18.1
+    heritage: Helm
+    release: jfrog
+type: Opaque
+data:
+  master-key: "YmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYg=="
+  join-key: "RUVFRUVFRUVFRUVFRUVFRUVFRUVFRUVFRUVFRUVFRUU="
+  redis-password: "MWNEWTB5cjdacQ=="
+---
+# Source: jfrog-platform/charts/distribution/templates/distribution-system-yaml.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: jfrog-distribution-systemyaml
+  labels:
+    app: distribution
+    chart: distribution-102.18.1
+    component: distribution
+    heritage: Helm
+    release: jfrog
+type: Opaque
+stringData:
+  system.yaml: |
+    router:
+      serviceRegistry:
+        insecure: false
+    shared:
+      logging:
+        consoleLog:
+          enabled: false
+      jfrogUrl: "http://jfrog-artifactory:8082"
+      database:
+        type: "postgresql"
+        driver: "org.postgresql.Driver"
+    distribution:
+      extraJavaOpts: >
+---
+# Source: jfrog-platform/charts/insight/templates/database-secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: jfrog-insight-database-creds
+  labels:
+    app: insight
+    chart: insight-101.14.0
+    heritage: Helm
+    release: jfrog
+type: Opaque
+data:
+  db-url: "amRiYzpwb3N0Z3Jlc3FsOi8vamZyb2ctcG9zdGdyZXNxbDo1NDMyL2luc2lnaHQ/c3NsbW9kZT1kaXNhYmxl"
+  db-user: "aW5zaWdodA=="
+  db-password: "aW5zaWdodA=="
+---
+# Source: jfrog-platform/charts/insight/templates/elasticsearch-secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: jfrog-insight-elasticsearch-cred
+  labels:
+    app: insight
+    chart: insight-101.14.0
+    heritage: Helm
+    release: jfrog
+type: Opaque
+data:
+  username:  "YWRtaW4="
+  password:  "YWRtaW4="
+  url:  "aHR0cDovL2xvY2FsaG9zdDo4MDgy"
+---
+# Source: jfrog-platform/charts/insight/templates/insight-secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: jfrog-insight
+  labels:
+    app: insight
+    chart: insight-101.14.0
+    heritage: Helm
+    release: jfrog
+type: Opaque
+data:
+  master-key: "YmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYg=="
+  join-key: "RUVFRUVFRUVFRUVFRUVFRUVFRUVFRUVFRUVFRUVFRUU="
+---
+# Source: jfrog-platform/charts/insight/templates/insight-system-yaml.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: jfrog-insight-systemyaml
+  labels:
+    app: insight
+    chart: insight-101.14.0
+    component: insight-server
+    heritage: Helm
+    release: jfrog
+type: Opaque
+stringData:
+  system.yaml: |
+    router:
+      serviceRegistry:
+        insecure: false
+    elasticsearch:
+      app:
+        version: 7.17.6
+    shared:
+      logging:
+        consoleLog:
+          enabled: false
+      jfrogUrl: "http://jfrog-artifactory:8082"
+      elasticsearch:
+        username: admin
+        password: admin
+      database:
+        type: "postgresql"
+        driver: "org.postgresql.Driver"
+    
+    insight-server:
+      clients:
+        elasticsearch:
+          connectionWaitTimeoutSecs: 180
+          searchguard:
+            connectionWaitTimeoutSecs: 1800
+---
+# Source: jfrog-platform/charts/pipelines/templates/database-secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: jfrog-pipelines-database
+  labels:
+    helm.sh/chart: pipelines-101.40.5
+    app.kubernetes.io/name: pipelines
+    app.kubernetes.io/instance: jfrog
+    app.kubernetes.io/version: "1.40.5"
+    app.kubernetes.io/managed-by: Helm
+type: Opaque
+data:
+  postgresql-password: "cGlwZWxpbmU="
+  postgresql-url: cG9zdGdyZXM6Ly9hcGl1c2VyOnBpcGVsaW5lQGpmcm9nLXBvc3RncmVzcWw6NTQzMi9waXBlbGluZXNkYj9zc2xtb2RlPWRpc2FibGU=
+---
+# Source: jfrog-platform/charts/pipelines/templates/pipelines-secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: jfrog-pipelines
+  labels:
+    app: pipelines
+    chart: pipelines-101.40.5
+    heritage: Helm
+    release: jfrog
+type: Opaque
+data:
+  master-key: "YmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYg=="
+  join-key: "RUVFRUVFRUVFRUVFRUVFRUVFRUVFRUVFRUVFRUVFRUU="
+---
+# Source: jfrog-platform/charts/pipelines/templates/pipelines-system-yaml.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: jfrog-pipelines-system-yaml
+  labels:
+    helm.sh/chart: pipelines-101.40.5
+    app.kubernetes.io/name: pipelines
+    app.kubernetes.io/instance: jfrog
+    app.kubernetes.io/version: "1.40.5"
+    app.kubernetes.io/managed-by: Helm
+type: Opaque
+stringData:
+  system.yaml: |
+    
+    shared:
+      ## Artifactory configuration
+      ##
+      artifactory:
+        ## Artifactory URL
+        ##
+        baseUrl: "http://jfrog-artifactory:8082"
+        ## Unified UI URL
+        ##
+        baseUrlUI: ""
+        ## Pipelines Service ID
+        ##
+        serviceId: "jfpip@12345"
+        ## Artifactory Service ID
+        ##
+        artifactoryServiceId: "FFFFFFFFFFFF"
+        ## Artifactory License ID
+        ##
+        licenseId: "FFFFFFFFF"
+        ## Proxy to connect to Artifactory
+        ##
+        proxy:
+          url: ""
+          username: ""
+          password: ""
+    
+      ## JFConnect configuration
+      ##
+      jfconnect:
+        enabled: false
+    
+      ## Routers configuration
+      ##
+      router:
+        ip: ""
+        accessPort: 8046
+        dataPort: 8082
+    
+      ## Database configuration
+      ##
+      db:
+        type: "postgres"
+        maxOpenConnections: 5
+        minOpenConnections: 0
+        idleTimeoutInSeconds: 10
+        ip: jfrog-postgresql
+        port: "5432"
+        name: pipelinesdb
+        username: apiuser
+        password: "pipeline"
+        externalUrl: ""
+        connectionString: "postgres://apiuser:pipeline@jfrog-postgresql:5432/pipelinesdb"
+    
+      ## RabbitMQ configuration
+      ##
+      msg:
+        ip: jfrog-rabbitmq
+        port: 5672
+        adminPort: 15672
+        erlangCookie: secretcookie
+        username: admin
+        password: "password"
+        defaultExchange: rootvhost
+        amqpVhost: pipelines
+        amqpRootVhost: pipelinesRoot
+        protocol: amqp
+        queues:
+          - "core.pipelineSync"
+          - "core.runTrigger"
+          - "core.stepTrigger"
+          - "core.marshaller"
+          - "cluster.init"
+          - "core.logup"
+          - "www.signals"
+          - "core.nexec"
+          - "core.nodePoolService"
+          - "core.hookHandler"
+          - "core.extensionSync"
+          - "core.templateSync"
+          - "core.reqSealer"
+          - "core.runService"
+          - "core.logService"
+          - "core.stepService"
+        ui:
+          protocol: http
+          username: admin
+          password: "password"
+        external:
+          ## URL for build plane VMs to access RabbitMQ
+          url: amqp://jfrog-rabbitmq:5672
+          rootUrl: ""
+          adminUrl: ""
+        build:
+          username: 
+          password: ""
+    
+      ## Vault configuration
+      ##
+      vault:
+        port: 8200
+        ip: jfrog-vault
+        url: http://jfrog-vault:8200
+        ## DO NOT CHANGE THE TOKEN VALUE!!!
+        token: "_VAULT_TOKEN_"
+        unsealKeys:
+          - ""
+          - ""
+          - ""
+          - ""
+          - ""
+    
+      ## Access configuration
+      ##
+      access:
+        enableVaultToAccessMigration: false
+        shouldJustUpdateAccess: false
+        shouldReadFromVault: false
+      ## Redis configuration
+      ##
+      redis:
+        ip: jfrog-redis-master
+        port: 6379
+    
+        clusterEnabled: false
+    
+      ## Metrics logging
+      metrics:
+        enabled: false
+      logging:
+    
+        view:
+          enabled: false
+          refreshRate: 10s
+          concurrentSessionsPerUser: 10
+    
+        metrics:
+          filePath: /opt/jfrog/pipelines/var/log/api-metrics_events.log
+          console: false
+          rotation:
+            maxSizeMb: 25
+            maxFiles: 10
+            maxAgeDays: 365
+            compress: true
+            intervalMs: 900000
+    
+        application:
+          level: warn
+          loggerConfigResetTimeoutInSeconds: 1800
+          rotation:
+            maxSizeMb: 10
+            maxFiles: 10
+          streamToStdout: false
+    
+        request:
+          rotation:
+            maxSizeMb: 10
+            maxFiles: 10
+          streamToStdout: false
+    
+        metricsFramework:
+          customMetricsCronFrequencyInMins: 360
+          predefinedMetricsCronFrequencyInMins: 1
+          rotation:
+            maxSizeMb: 10
+            maxFiles: 10
+    
+    ## This section is used for bringing up the core services and setting up
+    ## configurations required by the installer & the services
+    ##
+    core:
+      ## id is automatically determined based on the current hostname
+      ## or set using the SHARED_NODE_ID environment variable.
+      ##
+      id: "afd8df9d08bf257ae9b7d7dbbf348b7a3a574ebdd3a61d350d4b64e3129dee85"
+      installerIP: "1.2.3.4"
+      installerAuthToken: "c7595edd-b63d-4fd6-9e1e-13924d6637f0"
+      installerImage: "jfrog/pipelines-installer"
+      registryUrl: "releases-docker.jfrog.io"
+      os: "Ubuntu_16.04"
+      osDistribution: "xenial"
+      architecture: "x86_64"
+      dockerVersion: ""
+      runMode: "production"
+      user: ""
+      group: ""
+      noVerifySsl: false
+      ignoreTLSErrors: false
+      controlplaneVersion: 1.40.5
+      buildplaneVersion: 1.40.5
+      accessControlAllowOrigins:
+        - update_with_artifactory_url
+        - 
+      rabbitmqHealthCheckIntervalInMins: 1
+      artifactoryHealthCheckIntervalInMins: 1
+      dbHealthCheckIntervalInMins: 1
+      dbHealthCheckTimeoutInSeconds: 2
+      autoSyncResourceIfOutdated: false
+      allowBuildBadges: false
+      ## Global proxy settings, to be applied to all services
+      ##
+      proxy:
+        httpProxy: ""
+        httpsProxy: ""
+        noProxy: ""
+        username: ""
+        password: ""
+    
+      ## Mailserver settings
+      ##
+      mailserver:
+        host: ""
+        port: ""
+        username: ""
+        password: ""
+        tls: ""
+        ssl: ""
+      apiRetryIntervalMs: 3000
+      accountSyncFrequencyHr: 1
+      hardDeleteIntervalInMins: 60
+      configBackupCount: 5
+      lastUpdateTime: ""
+      callHomeUrl:  "https://api.bintray.com/products/jfrog/pipelines/stats/usage"
+      allowCallHome: true
+      serviceInstanceHealthCheckIntervalInMins: 10
+      serviceInstanceStatsCutOffIntervalInHours: 24
+      systemConfigRefreshIntervalInSeconds: 300
+      customCACertsPath: ""
+      signedPipelinesEnabled: true
+    
+      retentionPolicy:
+        enabled: false
+        maxAgeDays: 90
+        minRuns: 10
+    
+      ## Service configuration
+      ##
+      services:
+        api:
+          name: jfrog-pipelines-api
+          port: 30000
+          externalUrl: /pipelines/api
+          newProbes: true
+          healthCheck:
+            intervalSecs: 120
+          probes:
+            liveness:
+              failOnLongFailingReadiness:
+                enabled: true
+                failureDurationSecs: 60
+        www:
+          name: jfrog-pipelines-www
+          port: 30001
+          sessionSecret: "c7595edd-b63d-4fd6-9e1e-13924d6637f0"
+        frontend:
+          name: jfrog-pipelines-frontend
+          port: 30042
+          sessionSecret: "c7595edd-b63d-4fd6-9e1e-13924d6637f0"
+        pipelineSync:
+          name: pipelineSync
+        runTrigger:
+          name: runTrigger
+        runservice:
+          name: runservice
+        logservice:
+          name: logservice
+        stepTrigger:
+          name: stepTrigger
+        stepservice:
+          name: stepservice
+        cron:
+          name: cron
+        nexec:
+          name: nexec
+        hookHandler:
+          name: hookHandler
+        marshaller:
+          name: marshaller
+        extensionSync:
+          name: extensionSync
+        templateSync:
+          name: templateSync
+        reqSealer:
+          name: reqSealer
+        logup:
+          name: logup
+    
+    ## Runtime configuration
+    ##
+    runtime:
+      rootBucket: "jfrogpipelines"
+      defaultMinionCount: 1
+      nodeCacheIntervalMS: 600000
+      jobConsoleBatchSize: 10
+      jobConsoleBufferIntervalMs: 3
+      maxDiskUsagePercentage: 90
+      stepTimeoutMS: 2.16e+07
+      nodeStopDayOfWeek: 0
+      nodeStopIntervalDays: 30
+      maxNodeCheckInDelayMin: 15
+      nodePollerIntervalMS: 15000
+      defaultMinionInstanceSize: "c4.large"
+      allowDynamicNodes: true
+      allowCustomNodes: true
+      enforceNonRootNodes: false
+      languageImages:
+        - architecture: x86_64
+          os: Ubuntu_18.04
+          language: node
+          registryUrl: releases-docker.jfrog.io
+          image: jfrog/pipelines-u18node
+          isDefault: true
+          defaultVersion: 16
+        - architecture: x86_64
+          os: Ubuntu_18.04
+          language: go
+          registryUrl: releases-docker.jfrog.io
+          image: jfrog/pipelines-u18go
+          defaultVersion: 1.19
+        - architecture: x86_64
+          os: Ubuntu_18.04
+          language: java
+          registryUrl: releases-docker.jfrog.io
+          image: jfrog/pipelines-u18java
+          defaultVersion: 17
+        - architecture: x86_64
+          os: Ubuntu_18.04
+          language: cpp
+          registryUrl: releases-docker.jfrog.io
+          image: jfrog/pipelines-u18cpp
+          defaultVersion: 10
+        - architecture: ARM64
+          os: Ubuntu_20.04
+          language: node
+          registryUrl: releases-docker.jfrog.io
+          image: jfrog/pipelines-u20node
+          isDefault: true
+          defaultVersion: 16
+        - architecture: x86_64
+          os: Ubuntu_20.04
+          language: node
+          registryUrl: releases-docker.jfrog.io
+          image: jfrog/pipelines-u20node
+          isDefault: true
+          defaultVersion: 16
+        - architecture: x86_64
+          os: Ubuntu_20.04
+          language: java
+          registryUrl: releases-docker.jfrog.io
+          image: jfrog/pipelines-u20java
+          defaultVersion: 17
+        - architecture: x86_64
+          os: Ubuntu_20.04
+          language: cpp
+          registryUrl: releases-docker.jfrog.io
+          image: jfrog/pipelines-u20cpp
+          defaultVersion: 10
+        - architecture: x86_64
+          os: Ubuntu_20.04
+          language: go
+          registryUrl: releases-docker.jfrog.io
+          image: jfrog/pipelines-u20go
+          defaultVersion: 1.19
+        - architecture: x86_64
+          os: CentOS_7
+          language: node
+          registryUrl: releases-docker.jfrog.io
+          image: jfrog/pipelines-c7node
+          isDefault: true
+          defaultVersion: 16
+        - architecture: x86_64
+          os: CentOS_7
+          language: java
+          registryUrl: releases-docker.jfrog.io
+          image: jfrog/pipelines-c7java
+          defaultVersion: 17
+        - architecture: x86_64
+          os: CentOS_7
+          language: cpp
+          registryUrl: releases-docker.jfrog.io
+          image: jfrog/pipelines-c7cpp
+          defaultVersion: 3
+        - architecture: x86_64
+          os: CentOS_7
+          language: go
+          registryUrl: releases-docker.jfrog.io
+          image: jfrog/pipelines-c7go
+          defaultVersion: 1.19
+        - architecture: x86_64
+          os: CentOS_8
+          language: node
+          registryUrl: releases-docker.jfrog.io
+          image: jfrog/pipelines-c8node
+          isDefault: true
+          defaultVersion: 16
+        - architecture: x86_64
+          os: CentOS_8
+          language: java
+          registryUrl: releases-docker.jfrog.io
+          image: jfrog/pipelines-c8java
+          defaultVersion: 17
+        - architecture: x86_64
+          os: CentOS_8
+          language: cpp
+          registryUrl: releases-docker.jfrog.io
+          image: jfrog/pipelines-c8cpp
+          defaultVersion: 9
+        - architecture: x86_64
+          os: CentOS_8
+          language: go
+          registryUrl: releases-docker.jfrog.io
+          image: jfrog/pipelines-c8go
+          defaultVersion: 1.19
+        - architecture: x86_64
+          os: WindowsServer_2019
+          language: node
+          registryUrl: releases-docker.jfrog.io
+          image: jfrog/pipelines-w19node
+          defaultVersion: 16
+        - architecture: x86_64
+          os: WindowsServer_2019
+          language: java
+          registryUrl: releases-docker.jfrog.io
+          image: jfrog/pipelines-w19java
+          defaultVersion: 11
+        - architecture: x86_64
+          os: WindowsServer_2019
+          language: cpp
+          registryUrl: releases-docker.jfrog.io
+          image: jfrog/pipelines-w19cpp
+          defaultVersion: 10
+        - architecture: x86_64
+          os: WindowsServer_2019
+          language: go
+          registryUrl: releases-docker.jfrog.io
+          image: jfrog/pipelines-w19go
+          defaultVersion: 1.19
+        - architecture: x86_64
+          os: WindowsServer_2019
+          language: dotnet
+          registryUrl: releases-docker.jfrog.io
+          image: jfrog/pipelines-w19dotnet
+          isDefault: true
+          defaultVersion: 6
+        - architecture: x86_64
+          os: WindowsServer_2019
+          language: dotnetcore
+          registryUrl: releases-docker.jfrog.io
+          image: jfrog/pipelines-w19dotnetcore
+          defaultVersion: 3
+        - architecture: x86_64
+          os: RHEL_7
+          language: node
+          registryUrl: releases-docker.jfrog.io
+          image: jfrog/pipelines-c7node
+          isDefault: true
+          defaultVersion: 16
+        - architecture: x86_64
+          os: RHEL_7
+          language: java
+          registryUrl: releases-docker.jfrog.io
+          image: jfrog/pipelines-c7java
+          defaultVersion: 17
+        - architecture: x86_64
+          os: RHEL_7
+          language: cpp
+          registryUrl: releases-docker.jfrog.io
+          image: jfrog/pipelines-c7cpp
+          defaultVersion: 3
+        - architecture: x86_64
+          os: RHEL_7
+          language: go
+          registryUrl: releases-docker.jfrog.io
+          image: jfrog/pipelines-c7go
+          defaultVersion: 1.19
+        - architecture: x86_64
+          os: RHEL_8
+          language: node
+          registryUrl: releases-docker.jfrog.io
+          image: jfrog/pipelines-c8node
+          isDefault: true
+          defaultVersion: 16
+        - architecture: x86_64
+          os: RHEL_8
+          language: java
+          registryUrl: releases-docker.jfrog.io
+          image: jfrog/pipelines-c8java
+          defaultVersion: 17
+        - architecture: x86_64
+          os: RHEL_8
+          language: cpp
+          registryUrl: releases-docker.jfrog.io
+          image: jfrog/pipelines-c8cpp
+          defaultVersion: 9
+        - architecture: x86_64
+          os: RHEL_8
+          language: go
+          registryUrl: releases-docker.jfrog.io
+          image: jfrog/pipelines-c8go
+          defaultVersion: 1.19
+---
+# Source: jfrog-platform/charts/pipelines/templates/vault-pg-storage-secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: vault-storage-config
+  labels:
+    helm.sh/chart: pipelines-101.40.5
+    app.kubernetes.io/name: pipelines
+    app.kubernetes.io/instance: jfrog
+    app.kubernetes.io/version: "1.40.5"
+    app.kubernetes.io/managed-by: Helm
+    component: jfrog-pipelines-vault
+type: Opaque
+data:
+  postgresql-url: cG9zdGdyZXM6Ly9hcGl1c2VyOnBpcGVsaW5lQGpmcm9nLXBvc3RncmVzcWw6NTQzMi9waXBlbGluZXNkYj9zc2xtb2RlPWRpc2FibGU=
+stringData:
+  config.hcl: |
+    storage "postgresql" {
+      connection_url = "postgres://apiuser:pipeline@jfrog-postgresql:5432/pipelinesdb?sslmode=disable"
+      ha_enabled = "false"
+    }
+  vault.sql: |
+    CREATE TABLE IF NOT EXISTS vault_kv_store (
+      parent_path TEXT COLLATE "C" NOT NULL,
+      path        TEXT COLLATE "C",
+      key         TEXT COLLATE "C",
+      value       BYTEA,
+      CONSTRAINT pkey PRIMARY KEY (path, key)
+    );
+    CREATE INDEX parent_path_idx ON vault_kv_store (parent_path);
+    CREATE TABLE IF NOT EXISTS vault_ha_locks (
+      ha_key                                      TEXT COLLATE "C" NOT NULL,
+      ha_identity                                 TEXT COLLATE "C" NOT NULL,
+      ha_value                                    TEXT COLLATE "C",
+      valid_until                                 TIMESTAMP WITH TIME ZONE NOT NULL,
+      CONSTRAINT ha_key PRIMARY KEY (ha_key)
+    );
+  postgresql-connection: |
+    jfrog-postgresql 5432
+---
+# Source: jfrog-platform/charts/postgresql/templates/secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: jfrog-postgresql
+  labels:
+    app.kubernetes.io/name: postgresql
+    helm.sh/chart: postgresql-10.3.18
+    app.kubernetes.io/instance: jfrog
+    app.kubernetes.io/managed-by: Helm
+  namespace: default
+type: Opaque
+data:
+  postgresql-password: "cG9zdGdyZXM="
+---
+# Source: jfrog-platform/charts/rabbitmq/templates/config-secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: jfrog-rabbitmq-config
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: rabbitmq
+    helm.sh/chart: rabbitmq-11.9.3
+    app.kubernetes.io/instance: jfrog
+    app.kubernetes.io/managed-by: Helm
+type: Opaque
+data:
+  rabbitmq.conf: |-
+    IyMgVXNlcm5hbWUgYW5kIHBhc3N3b3JkCiMjCmRlZmF1bHRfdXNlciA9IGFkbWluCiMjIENsdXN0ZXJpbmcKIyMKY2x1c3Rlcl9mb3JtYXRpb24ucGVlcl9kaXNjb3ZlcnlfYmFja2VuZCAgPSByYWJiaXRfcGVlcl9kaXNjb3ZlcnlfazhzCmNsdXN0ZXJfZm9ybWF0aW9uLms4cy5ob3N0ID0ga3ViZXJuZXRlcy5kZWZhdWx0CmNsdXN0ZXJfZm9ybWF0aW9uLm5vZGVfY2xlYW51cC5pbnRlcnZhbCA9IDEwCmNsdXN0ZXJfZm9ybWF0aW9uLm5vZGVfY2xlYW51cC5vbmx5X2xvZ193YXJuaW5nID0gdHJ1ZQpjbHVzdGVyX3BhcnRpdGlvbl9oYW5kbGluZyA9IGF1dG9oZWFsCmxvYWRfZGVmaW5pdGlvbnMgPSAvYXBwL2xvYWRfZGVmaW5pdGlvbi5qc29uCiMgcXVldWUgbWFzdGVyIGxvY2F0b3IKcXVldWVfbWFzdGVyX2xvY2F0b3IgPSBtaW4tbWFzdGVycwojIGVuYWJsZSBsb29wYmFjayB1c2VyCmxvb3BiYWNrX3VzZXJzLmFkbWluID0gZmFsc2UKI2RlZmF1bHRfdmhvc3QgPSBkZWZhdWx0LXZob3N0CiNkaXNrX2ZyZWVfbGltaXQuYWJzb2x1dGUgPSA1ME1C
+---
+# Source: jfrog-platform/charts/rabbitmq/templates/secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: jfrog-rabbitmq
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: rabbitmq
+    helm.sh/chart: rabbitmq-11.9.3
+    app.kubernetes.io/instance: jfrog
+    app.kubernetes.io/managed-by: Helm
+type: Opaque
+data:
+  rabbitmq-password: "cGFzc3dvcmQ="
+  
+  rabbitmq-erlang-cookie: "c2VjcmV0Y29va2ll"
+---
+# Source: jfrog-platform/charts/rabbitmq/templates/secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: jfrog-load-definition
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: rabbitmq
+    helm.sh/chart: rabbitmq-11.9.3
+    app.kubernetes.io/instance: jfrog
+    app.kubernetes.io/managed-by: Helm
+type: Opaque
+stringData:
+  load_definition.json: |
+    {
+      "vhosts": [
+        {
+          "name": "xray"
+        }
+      ],
+      "users": [
+        {
+          "name": "admin",
+          "password": "password",
+          "tags": "administrator"
+        }
+      ],
+      "permissions": [
+      {
+        "user": "admin",
+        "vhost": "xray",
+        "configure": ".*",
+        "write": ".*",
+        "read": ".*"
+      }
+      ],
+      "policies": [
+        {
+          "name": "ha-all",
+          "apply-to": "all",
+          "pattern": ".*",
+          "vhost": "xray",
+          "definition": {
+            "ha-mode": "all",
+            "ha-sync-mode": "automatic"
+          }
+        }
+      ]
+    }
+---
+# Source: jfrog-platform/charts/xray/templates/xray-database-secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: jfrog-xray-database-creds
+  labels:
+    app: xray
+    chart: xray-103.76.7
+    heritage: Helm
+    release: jfrog
+type: Opaque
+data:
+  db-url: "cG9zdGdyZXM6Ly9qZnJvZy1wb3N0Z3Jlc3FsOjU0MzIveHJheT9zc2xtb2RlPWRpc2FibGU="
+  db-user: "eHJheQ=="
+  db-password: "eHJheQ=="
+---
+# Source: jfrog-platform/charts/xray/templates/xray-secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: jfrog-xray
+  labels:
+    app: xray
+    chart: xray-103.76.7
+    heritage: Helm
+    release: jfrog
+type: Opaque
+data:
+  master-key: "YmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYg=="
+  join-key: "RUVFRUVFRUVFRUVFRUVFRUVFRUVFRUVFRUVFRUVFRUU="
+  execution-service-aes-key: "bUVTUk1aRXFqa09Sd3R2Um8yWnluZzcxT0ZSbGdLOGM="
+---
+# Source: jfrog-platform/charts/xray/templates/xray-system-yaml.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: jfrog-xray-system-yaml
+  labels:
+    app: xray
+    chart: xray-103.76.7
+    heritage: Helm
+    release: jfrog
+type: Opaque
+stringData:
+  system.yaml: |
+    configVersion: 1
+    router:
+      serviceRegistry:
+        insecure: false
+    shared:
+      logging:
+        consoleLog:
+          enabled: false
+      jfrogUrl: "http://jfrog-artifactory:8082"
+      database:
+        type: postgresql
+        driver: org.postgresql.Driver
+      rabbitMq:
+        erlangCookie:
+          value: "secretcookie"
+        url: "amqp://jfrog-rabbitmq:5672"
+        username: "admin"
+        password: "password"
+    contextualAnalysis:
+      registry: releases-docker.jfrog.io
+      image: jfrog/xray-jas-contextual-analysis
+    exposures:
+      container:
+        registry: releases-docker.jfrog.io
+        image: jfrog/xray-jas-exposures
+---
+# Source: jfrog-platform/charts/artifactory/templates/artifactory-installer-info.yaml
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: jfrog-artifactory-installer-info
+  labels:
+    app: artifactory
+    chart: artifactory-107.59.11
+    heritage: Helm
+    release: jfrog
+data:
+  installer-info.json: |
+    {"productId": "Helm_JFrogPlatform/10.13.3-7.59.11", "features": [ { "featureId": "Platform/kubernetes-v1.27.0"}]}
+---
+# Source: jfrog-platform/charts/artifactory/templates/nginx-artifactory-conf.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jfrog-artifactory-nginx-artifactory-conf
+  labels:
+    app: artifactory
+    chart: artifactory-107.59.11
+    heritage: Helm
+    release: jfrog
+data:
+  artifactory.conf: |
+    
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
+    ssl_certificate  /var/opt/jfrog/nginx/ssl/tls.crt;
+    ssl_certificate_key  /var/opt/jfrog/nginx/ssl/tls.key;
+    ssl_session_cache shared:SSL:1m;
+    ssl_prefer_server_ciphers   on;
+    ## server configuration
+    server {
+      listen 443 ssl;
+      listen 80;
+      server_name ~(?<repo>.+)\.jfrog-artifactory jfrog-artifactory;
+    
+      if ($http_x_forwarded_proto = '') {
+        set $http_x_forwarded_proto  $scheme;
+      }
+      ## Application specific logs
+      ## access_log /var/log/nginx/artifactory-access.log timing;
+      ## error_log /var/log/nginx/artifactory-error.log;
+      rewrite ^/artifactory/?$ / redirect;
+      if ( $repo != "" ) {
+        rewrite ^/(v1|v2)/(.*) /artifactory/api/docker/$repo/$1/$2 break;
+      }
+      chunked_transfer_encoding on;
+      client_max_body_size 0;
+    
+      location / {
+        proxy_read_timeout  900;
+        proxy_pass_header   Server;
+        proxy_cookie_path   ~*^/.* /;
+        proxy_pass          http://jfrog-artifactory:8082/;
+        proxy_set_header    X-JFrog-Override-Base-Url $http_x_forwarded_proto://$host:$server_port;
+        proxy_set_header    X-Forwarded-Port  $server_port;
+        proxy_set_header    X-Forwarded-Proto $http_x_forwarded_proto;
+        proxy_set_header    Host              $http_host;
+        proxy_set_header    X-Forwarded-For   $proxy_add_x_forwarded_for;
+        add_header Strict-Transport-Security always;
+    
+        location /artifactory/ {
+          if ( $request_uri ~ ^/artifactory/(.*)$ ) {
+            proxy_pass       http://jfrog-artifactory:8081/artifactory/$1;
+          }
+          proxy_pass         http://jfrog-artifactory:8081/artifactory/;
+        }
+        location /pipelines/ {
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+          proxy_set_header Host $http_host;
+          proxy_pass  http://jfrog-artifactory:8082;
+        }
+      }
+    }
+---
+# Source: jfrog-platform/charts/artifactory/templates/nginx-conf.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jfrog-artifactory-nginx-conf
+  labels:
+    app: artifactory
+    chart: artifactory-107.59.11
+    heritage: Helm
+    release: jfrog
+data:
+  nginx.conf: |
+    # Main Nginx configuration file
+    worker_processes  4;
+    
+    error_log  /var/opt/jfrog/nginx/logs/error.log warn;
+    pid        /tmp/nginx.pid;
+    
+    events {
+      worker_connections  1024;
+    }
+    
+    
+    http {
+      include       /etc/nginx/mime.types;
+      default_type  application/octet-stream;
+    
+      variables_hash_max_size 1024;
+      variables_hash_bucket_size 64;
+      server_names_hash_max_size 4096;
+      server_names_hash_bucket_size 128;
+      types_hash_max_size 2048;
+      types_hash_bucket_size 64;
+      proxy_read_timeout 2400s;
+      client_header_timeout 2400s;
+      client_body_timeout 2400s;
+      proxy_connect_timeout 75s;
+      proxy_send_timeout 2400s;
+      proxy_buffer_size 128k;
+      proxy_buffers 40 128k;
+      proxy_busy_buffers_size 128k;
+      proxy_temp_file_write_size 250m;
+      proxy_http_version 1.1;
+      client_body_buffer_size 128k;
+    
+      log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+      '$status $body_bytes_sent "$http_referer" '
+      '"$http_user_agent" "$http_x_forwarded_for"';
+    
+      log_format timing 'ip = $remote_addr '
+      'user = \"$remote_user\" '
+      'local_time = \"$time_local\" '
+      'host = $host '
+      'request = \"$request\" '
+      'status = $status '
+      'bytes = $body_bytes_sent '
+      'upstream = \"$upstream_addr\" '
+      'upstream_time = $upstream_response_time '
+      'request_time = $request_time '
+      'referer = \"$http_referer\" '
+      'UA = \"$http_user_agent\"';
+    
+      access_log  /var/opt/jfrog/nginx/logs/access.log  timing;
+    
+      sendfile        on;
+      #tcp_nopush     on;
+    
+      keepalive_timeout  65;
+    
+      #gzip  on;
+    
+      include /etc/nginx/conf.d/*.conf;
+    
+    }
+---
+# Source: jfrog-platform/charts/artifactory/templates/nginx-scripts-conf.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jfrog-artifactory-nginx-scripts
+  labels:
+    app: artifactory
+    chart: artifactory-107.59.11
+    heritage: Helm
+    release: jfrog
+data:
+  configreloader.sh: |
+    #!/bin/sh
+    ####
+    # A helper script to use inotifyd to reload nginx config
+    # upon configmap/ssl secrets changes.
+    #
+    # Synopsis: setup the nginx command via the values file
+    # as follows:
+    #
+    ####
+    # nginx:
+    #   customVolumes: |
+    #     - name: scripts
+    #       configMap:
+    #         name: {{ template "artifactory.fullname" . }}-nginx-scripts
+    #         defaultMode: 0550
+    #   customVolumeMounts: |
+    #     - name: scripts
+    #       mountPath: /var/opt/jfrog/nginx/scripts/
+    #   customCommand:
+    #     - /bin/sh
+    #     - -c
+    #     - |
+    #       # watch for configmap changes
+    #       /sbin/inotifyd /var/opt/jfrog/nginx/scripts/configreloader.sh {{ .Values.nginx.persistence.mountPath -}}/conf.d:n &
+    #       {{ if .Values.nginx.https.enabled -}}
+    #       # watch for tls secret changes
+    #       /sbin/inotifyd /var/opt/jfrog/nginx/scripts/configreloader.sh {{ .Values.nginx.persistence.mountPath -}}/ssl:n &
+    #       {{ end -}}
+    #       nginx -g 'daemon off;'
+    if [[ "$3" =~ data_tmp ]] && [ "$1" = "n" ]
+    then
+      # a symlink has changed in one of the watched folders
+      # lets verify the config
+      nginx -t -q
+      if [ $? -eq 0 ]
+      then
+        # config is valid, lets reload nginx config
+        nginx -q -s reload
+      fi
+    fi
+---
+# Source: jfrog-platform/charts/pipelines/charts/vault/templates/server-config-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jfrog-vault-config
+  namespace: default
+  labels:
+    helm.sh/chart: vault-0.16.1
+    app.kubernetes.io/name: vault
+    app.kubernetes.io/instance: jfrog
+    app.kubernetes.io/managed-by: Helm
+data:
+  extraconfig-from-values.hcl: |-
+    disable_mlock = true
+    ui = true
+    
+    listener "tcp" {
+      tls_disable = 1
+      address = "[::]:8200"
+      cluster_address = "[::]:8201"
+    }
+    storage "file" {
+      path = "/vault/data"
+    }
+    
+    # Example configuration for using auto-unseal, using Google Cloud KMS. The
+    # GKMS keys must already exist, and the cluster must have a service account
+    # that is authorized to access GCP KMS.
+    #seal "gcpckms" {
+    #   project     = "vault-helm-dev"
+    #   region      = "global"
+    #   key_ring    = "vault-helm-unseal-kr"
+    #   crypto_key  = "vault-helm-unseal-key"
+    #}
+---
+# Source: jfrog-platform/charts/pipelines/templates/pipelines-utility-configmaps.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jfrog-pipelines-utility-scripts
+  labels:
+    app: pipelines
+    chart: pipelines-101.40.5
+    heritage: Helm
+    release: jfrog
+data:
+  add_metrics.sh: |
+    #!/bin/bash
+    
+    find_diff(){
+        local date_end=${1};
+        local date_begin=${2};
+        if [[ -z "${date_begin}" || -z "${date_end}" ]]; then
+            return 1;
+        fi
+        local diff_in_milli_sec=0;
+        diff_in_milli_sec=$(( ($(date --date="$date_end" +%s) - $(date --date="$date_begin" +%s) )*(1000) ));
+        echo "$diff_in_milli_sec"
+    }
+    
+    append_metrics_json(){
+        local start_time="${1}"
+        local log_file="${2}"
+        local domain="${3}"
+        if [[ -z "${start_time}" || -z "${log_file}" || -z "${domain}" ]]; then
+            return 1;
+        fi
+        local end_time=$(date -u +"%Y-%m-%dT%H:%M:%SZ");
+        local current_time="${end_time}";
+        local duration_in_milli_sec="$(find_diff "${end_time}" "${start_time}")";
+    
+        if [[ -z "${duration_in_milli_sec}" ]]; then
+            return 1;
+        fi
+    
+        local paretDir=$(dirname "${log_file}");
+        [ -d "${paretDir}" ] || mkdir -p "${paretDir}"
+    
+        echo "Adding metric with duration ${duration_in_milli_sec} to ${log_file}"
+        echo "{\"timestamp\":\"${current_time}\",\"domain\":\"${domain}\",\"durationMillis\":${duration_in_milli_sec}}" >> "${log_file}"
+    }
+    
+    start_time="${1}";
+    log_file="${2}";
+    domain="${3}";
+    
+    append_metrics_json "${start_time}" "${log_file}" "${domain}"
+---
+# Source: jfrog-platform/charts/postgresql/templates/extended-config-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jfrog-postgresql-extended-configuration
+  labels:
+    app.kubernetes.io/name: postgresql
+    helm.sh/chart: postgresql-10.3.18
+    app.kubernetes.io/instance: jfrog
+    app.kubernetes.io/managed-by: Helm
+  namespace: default
+data:
+
+  override.conf: |
+    max_connections = 1000
+    max_wal_size = '1000MB'
+---
+# Source: jfrog-platform/charts/redis/templates/configmap-scripts.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jfrog-redis-scripts
+  namespace: "default"
+  labels:
+    app: redis
+    chart: redis-12.10.1
+    heritage: Helm
+    release: jfrog
+data:
+  start-master.sh: |
+    #!/bin/bash
+    if [[ -n $REDIS_PASSWORD_FILE ]]; then
+      password_aux=`cat ${REDIS_PASSWORD_FILE}`
+      export REDIS_PASSWORD=$password_aux
+    fi
+    if [[ ! -f /opt/bitnami/redis/etc/master.conf ]];then
+      cp /opt/bitnami/redis/mounted-etc/master.conf /opt/bitnami/redis/etc/master.conf
+    fi
+    if [[ ! -f /opt/bitnami/redis/etc/redis.conf ]];then
+      cp /opt/bitnami/redis/mounted-etc/redis.conf /opt/bitnami/redis/etc/redis.conf
+    fi
+    ARGS=("--port" "${REDIS_PORT}")
+    ARGS+=("--protected-mode" "no")
+    ARGS+=("--include" "/opt/bitnami/redis/etc/redis.conf")
+    ARGS+=("--include" "/opt/bitnami/redis/etc/master.conf")
+    exec /run.sh "${ARGS[@]}"
+---
+# Source: jfrog-platform/charts/redis/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jfrog-redis
+  namespace: "default"
+  labels:
+    app: redis
+    chart: redis-12.10.1
+    heritage: Helm
+    release: jfrog
+data:
+  redis.conf: |-
+    # User-supplied configuration:
+    # Enable AOF https://redis.io/topics/persistence#append-only-file
+    appendonly yes
+    # Disable RDB persistence, AOF persistence already enabled.
+    save ""
+  master.conf: |-
+    dir /data
+    rename-command FLUSHDB ""
+    rename-command FLUSHALL ""
+  replica.conf: |-
+    dir /data
+    slave-read-only yes
+    rename-command FLUSHDB ""
+    rename-command FLUSHALL ""
+---
+# Source: jfrog-platform/charts/redis/templates/health-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jfrog-redis-health
+  namespace: "default"
+  labels:
+    app: redis
+    chart: redis-12.10.1
+    heritage: Helm
+    release: jfrog
+data:
+  ping_readiness_local.sh: |-
+    #!/bin/bash
+    export REDISCLI_AUTH="$REDIS_PASSWORD"
+    response=$(
+      timeout -s 3 $1 \
+      redis-cli \
+        -h localhost \
+        -p $REDIS_PORT \
+        ping
+    )
+    if [ "$response" != "PONG" ]; then
+      echo "$response"
+      exit 1
+    fi
+  ping_liveness_local.sh: |-
+    #!/bin/bash
+    export REDISCLI_AUTH="$REDIS_PASSWORD"
+    response=$(
+      timeout -s 3 $1 \
+      redis-cli \
+        -h localhost \
+        -p $REDIS_PORT \
+        ping
+    )
+    if [ "$response" != "PONG" ] && [ "$response" != "LOADING Redis is loading the dataset in memory" ]; then
+      echo "$response"
+      exit 1
+    fi
+  ping_readiness_master.sh: |-
+    #!/bin/bash
+    export REDISCLI_AUTH="$REDIS_MASTER_PASSWORD"
+    response=$(
+      timeout -s 3 $1 \
+      redis-cli \
+        -h $REDIS_MASTER_HOST \
+        -p $REDIS_MASTER_PORT_NUMBER \
+        ping
+    )
+    if [ "$response" != "PONG" ]; then
+      echo "$response"
+      exit 1
+    fi
+  ping_liveness_master.sh: |-
+    #!/bin/bash
+    export REDISCLI_AUTH="$REDIS_MASTER_PASSWORD"
+    response=$(
+      timeout -s 3 $1 \
+      redis-cli \
+        -h $REDIS_MASTER_HOST \
+        -p $REDIS_MASTER_PORT_NUMBER \
+        ping
+    )
+    if [ "$response" != "PONG" ] && [ "$response" != "LOADING Redis is loading the dataset in memory" ]; then
+      echo "$response"
+      exit 1
+    fi
+  ping_readiness_local_and_master.sh: |-
+    script_dir="$(dirname "$0")"
+    exit_status=0
+    "$script_dir/ping_readiness_local.sh" $1 || exit_status=$?
+    "$script_dir/ping_readiness_master.sh" $1 || exit_status=$?
+    exit $exit_status
+  ping_liveness_local_and_master.sh: |-
+    script_dir="$(dirname "$0")"
+    exit_status=0
+    "$script_dir/ping_liveness_local.sh" $1 || exit_status=$?
+    "$script_dir/ping_liveness_master.sh" $1 || exit_status=$?
+    exit $exit_status
+---
+# Source: jfrog-platform/templates/platform-ga-upgrade.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jfrog-jfrog-platform-configmap
+  labels:
+    app: jfrog-platform
+    chart: jfrog-platform-10.13.3
+    heritage: Helm
+    release: jfrog
+data:
+---
+# Source: jfrog-platform/templates/postgres-setup-script.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jfrog-setup-script
+  labels:
+    app: postgres-init
+data:
+  setupPostgres.sh: |
+    #!/bin/bash
+    # This can be used to create user, database, schema and grant the required permissions.
+    # This script can handle multiple execution and not with "already exists" error. An entity will get created only if it does not exist.
+    # NOTE : 1. This expects current linux user to be admin user in postgreSQL (this is the case with 'postgres' user)
+    #        2. Execute this by logging as postgres or any other user with similar privilege
+    #        3. This files needs be executed from a location which postgres (or the admin user which will be used) has access to. (/opt can be used)
+    #
+    #        su postgres -c "POSTGRES_PATH=/path/to/postgres/bin PGPASSWORD=postgres bash ./createPostgresUsers.sh"
+    POSTGRES_LABEL="Postgres"
+    
+    # Logging function
+    log() {
+        echo -e "$1"
+    }
+    
+    # Error function
+    errorExit() {
+        echo; echo -e "\033[31mERROR:\033[0m $1"; echo
+        exit 1
+    }
+    
+    # Create user if it does not exist
+    createUser(){
+        local user=$1
+        local pass=$2
+        [ ! -z ${user} ] || errorExit "user is empty"
+        [ ! -z ${pass} ] || errorExit "password is empty"
+        ${PSQL} $POSTGRES_OPTIONS -tAc "SELECT 1 FROM pg_roles WHERE rolname='${user}'" | grep -q 1 1>/dev/null
+        local rc=$?
+        # Create user if doesn't exists
+        if [[ ${rc} -ne 0 ]]; then
+            echo "Creating user ${user}..."
+            ${PSQL} $POSTGRES_OPTIONS -c "CREATE USER ${user} WITH PASSWORD '${pass}';" 1>/dev/null || errorExit "Failed creating user ${user} on PostgreSQL"
+            echo "Done"
+        fi
+    }
+    
+    # Create database if it does not exist
+    createDB(){
+        local db=$1
+        local user=$2
+        [ ! -z ${db}   ] || errorExit "db is empty"
+        [ ! -z ${user} ] || errorExit "user is empty"
+        if ! ${PSQL} $POSTGRES_OPTIONS -lqt | cut -d \| -f 1 | grep -qw ${db} 1>/dev/null; then
+            ${PSQL} $POSTGRES_OPTIONS -c "CREATE DATABASE ${db} WITH OWNER=${user} ENCODING='UTF8';" 1>/dev/null || errorExit "Failed creating db ${db} on PostgreSQL"
+        fi
+    }
+    
+    # Check if postgres db is ready
+    postgresIsNotReady() {
+        attempt_number=${attempt_number:-0}
+        ${PSQL} $POSTGRES_OPTIONS --version > /dev/null 2>&1
+        outcome1=$?
+        # Execute a simple db function to verify if postgres is up and running
+        ${PSQL} $POSTGRES_OPTIONS -l > /dev/null 2>&1
+        outcome2=$?
+        if [[ $outcome1 -eq 0 ]] && [[ $outcome2 -eq 0  ]]; then
+            return 0
+        else
+            if [ $attempt_number -gt 10 ]; then
+                errorExit "Unable to proceed. $POSTGRES_LABEL is not reachable. This can occur if the service is not running \
+    or the port is not accepting requests at $DB_PORT (host : $DB_HOST). Gave up after $attempt_number attempts"
+            fi
+            let "attempt_number=attempt_number+1"
+            return 1
+        fi
+    }
+    
+    # Wait for availability of postgres
+    init(){
+        if [[ -z $POSTGRES_PATH ]]; then
+            hash ${PSQL} 2>/dev/null || { echo >&2 "\"${PSQL}\" is not installed or not available in path"; exit 1; }
+        fi
+        log "Waiting for $POSTGRES_LABEL to get ready using the commands: \"${PSQL} $POSTGRES_OPTIONS --version\" & \"${PSQL} $POSTGRES_OPTIONS -l\""
+        attempt_number=0
+        while ! postgresIsNotReady
+        do
+            sleep 5
+            echo -n '.'
+        done
+        log "$POSTGRES_LABEL is ready. Executing commands"
+    }
+    
+    # Create users and DB
+    setupDB(){
+        local user=$1
+        local pass=$2
+        local db=$3
+        # Create user
+        createUser "${user}" "${pass}"    
+        createDB "${db}" "${user}"
+        ${PSQL} $POSTGRES_OPTIONS -c "GRANT ALL PRIVILEGES ON DATABASE ${db} TO ${user}" 1>/dev/null;
+    }
+    
+    # Load default and custom postgres details from below files
+    [ -f setenvDefaults.sh ] && source setenvDefaults.sh || true
+    [ -f setenv.sh         ] && source setenv.sh         || true
+    
+    # DB_NAME=$1
+    # DB_USERNAME=$2
+    # DB_PASSWORD=$3
+    # CHART_NAME=$4
+    
+    : ${DB_NAME:=$1}
+    : ${DB_USERNAME:=$2}
+    : ${DB_PASSWORD:=$3}
+    : ${CHART_NAME:=4}
+    
+    ### Following are the postgres details being setup for each service.
+    ##  Common details
+    : ${DB_PORT:=5432}
+    : ${DB_SSL_MODE:="disable"}
+    : ${DB_TABLESPACE:="pg_default"}
+    : ${DB_HOST:="localhost"}
+    
+    ## Set Postgres options
+    [[ -z "${POSTGRES_PATH}" ]] && PSQL=psql || PSQL=${POSTGRES_PATH}/psql
+    POSTGRES_OPTIONS="sslmode=${DB_SSL_MODE} --host=${DB_HOST} -U ${PGUSERNAME} -w"
+    
+    init
+    
+    log "Setting up DB $DB_NAME and user $DB_USERNAME on Postgres for $CHART_NAME chart."
+    setupDB "${DB_USERNAME}" "${DB_PASSWORD}" "${DB_NAME}" || true
+    
+    log "$POSTGRES_LABEL setup is now complete."
+    
+    exit 0
+---
+# Source: jfrog-platform/charts/pipelines/charts/vault/templates/server-clusterrolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: jfrog-vault-server-binding
+  labels:
+    helm.sh/chart: vault-0.16.1
+    app.kubernetes.io/name: vault
+    app.kubernetes.io/instance: jfrog
+    app.kubernetes.io/managed-by: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:auth-delegator
+subjects:
+- kind: ServiceAccount
+  name: vault
+  namespace: default
+---
+# Source: jfrog-platform/charts/pipelines/templates/vault-role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: jfrog-pipelines-vault
+  labels:
+    helm.sh/chart: pipelines-101.40.5
+    app.kubernetes.io/name: pipelines
+    app.kubernetes.io/instance: jfrog
+    app.kubernetes.io/version: "1.40.5"
+    app.kubernetes.io/managed-by: Helm
+    component: jfrog-pipelines-vault
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - '*'
+---
+# Source: jfrog-platform/charts/rabbitmq/templates/role.yaml
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: jfrog-rabbitmq-endpoint-reader
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: rabbitmq
+    helm.sh/chart: rabbitmq-11.9.3
+    app.kubernetes.io/instance: jfrog
+    app.kubernetes.io/managed-by: Helm
+rules:
+  - apiGroups: [""]
+    resources: ["endpoints"]
+    verbs: ["get"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create"]
+---
+# Source: jfrog-platform/charts/pipelines/templates/vault-rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: jfrog-pipelines-vault
+  labels:
+    helm.sh/chart: pipelines-101.40.5
+    app.kubernetes.io/name: pipelines
+    app.kubernetes.io/instance: jfrog
+    app.kubernetes.io/version: "1.40.5"
+    app.kubernetes.io/managed-by: Helm
+    component: jfrog-pipelines-vault
+subjects:
+- kind: ServiceAccount
+  name: vault
+roleRef:
+  kind: Role
+  apiGroup: rbac.authorization.k8s.io
+  name: jfrog-pipelines-vault
+---
+# Source: jfrog-platform/charts/rabbitmq/templates/rolebinding.yaml
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: jfrog-rabbitmq-endpoint-reader
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: rabbitmq
+    helm.sh/chart: rabbitmq-11.9.3
+    app.kubernetes.io/instance: jfrog
+    app.kubernetes.io/managed-by: Helm
+subjects:
+  - kind: ServiceAccount
+    name: jfrog-rabbitmq
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: jfrog-rabbitmq-endpoint-reader
+---
+# Source: jfrog-platform/charts/artifactory/templates/artifactory-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: jfrog-artifactory
+  labels:
+    app: artifactory
+    chart: artifactory-107.59.11
+    component: artifactory
+    heritage: Helm
+    release: jfrog
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8082
+    targetPort: 8082
+    protocol: TCP
+    name: http-router
+  - port: 8081
+    targetPort: 8081
+    protocol: TCP
+    name: http-artifactory
+  selector:
+    app: artifactory
+    component: "artifactory"
+    release: jfrog
+---
+# Source: jfrog-platform/charts/artifactory/templates/nginx-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: jfrog-artifactory-nginx
+  labels:
+    app: artifactory
+    chart: artifactory-107.59.11
+    component: nginx
+    heritage: Helm
+    release: jfrog
+spec:
+  type: LoadBalancer
+  
+  externalTrafficPolicy: Cluster
+  ports:
+  # DEPRECATION NOTE: The following is to maintain support for values pre 1.3.0 and
+  # will be cleaned up in a later version
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  - port: 443
+    targetPort: 443
+    protocol: TCP
+    name: https
+  selector:
+    app: artifactory
+    component: nginx
+    release: jfrog
+---
+# Source: jfrog-platform/charts/distribution/templates/distribution-svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: jfrog-distribution
+  labels:
+    app: distribution
+    chart: distribution-102.18.1
+    heritage: Helm
+    release: jfrog
+    component: distribution
+spec:
+  type: ClusterIP
+  ports:
+  - name: http-distro
+    port: 80
+    targetPort: http-distro
+  selector:
+    app: distribution
+    release: jfrog
+    component: distribution
+---
+# Source: jfrog-platform/charts/insight/templates/insight-svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: jfrog-insight
+  labels:
+    app: insight
+    chart: insight-101.14.0
+    component: insight-server
+    heritage: Helm
+    release: jfrog
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8087
+    protocol: TCP
+  - name: http-router
+    port: 8082
+    targetPort: 8082
+    protocol: TCP
+  - name: tcp-estransport
+    port: 9300
+    targetPort: 9300
+  publishNotReadyAddresses: true
+  selector:
+    app: insight
+    component: insight-server
+    release: jfrog
+---
+# Source: jfrog-platform/charts/pipelines/charts/vault/templates/server-headless-service.yaml
+# Service for Vault cluster
+apiVersion: v1
+kind: Service
+metadata:
+  name: jfrog-vault-internal
+  namespace: default
+  labels:
+    helm.sh/chart: vault-0.16.1
+    app.kubernetes.io/name: vault
+    app.kubernetes.io/instance: jfrog
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+  ports:
+    - name: "http"
+      port: 8200
+      targetPort: 8200
+    - name: https-internal
+      port: 8201
+      targetPort: 8201
+  selector:
+    app.kubernetes.io/name: vault
+    app.kubernetes.io/instance: jfrog
+    component: server
+---
+# Source: jfrog-platform/charts/pipelines/charts/vault/templates/server-service.yaml
+# Service for Vault cluster
+apiVersion: v1
+kind: Service
+metadata:
+  name: jfrog-vault
+  namespace: default
+  labels:
+    helm.sh/chart: vault-0.16.1
+    app.kubernetes.io/name: vault
+    app.kubernetes.io/instance: jfrog
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+
+spec:
+  # We want the servers to become available even if they're not ready
+  # since this DNS is also used for join operations.
+  publishNotReadyAddresses: true
+  ports:
+    - name: http
+      port: 8200
+      targetPort: 8200
+    - name: https-internal
+      port: 8201
+      targetPort: 8201
+  selector:
+    app.kubernetes.io/name: vault
+    app.kubernetes.io/instance: jfrog
+    component: server
+---
+# Source: jfrog-platform/charts/pipelines/templates/api-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: jfrog-pipelines-api
+  labels:
+    helm.sh/chart: pipelines-101.40.5
+    app.kubernetes.io/name: pipelines
+    app.kubernetes.io/instance: jfrog
+    app.kubernetes.io/version: "1.40.5"
+    app.kubernetes.io/managed-by: Helm
+    component: jfrog-pipelines-api
+    app: pipelines
+    chart: pipelines-101.40.5
+    heritage: Helm
+    release: jfrog
+spec:
+  type: ClusterIP
+  ports:
+    - port: 30000
+      targetPort: 30000
+      protocol: TCP
+      name: http-api
+  selector:
+    app.kubernetes.io/name: pipelines
+    app.kubernetes.io/instance: jfrog
+    component: jfrog-pipelines-services
+---
+# Source: jfrog-platform/charts/pipelines/templates/pipelines-service-headless.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: jfrog-pipelines-services-headless
+  labels:
+    helm.sh/chart: pipelines-101.40.5
+    app.kubernetes.io/name: pipelines
+    app.kubernetes.io/instance: jfrog
+    app.kubernetes.io/version: "1.40.5"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - port: 30000
+      targetPort: 30000
+      protocol: TCP
+      name: http-api
+    - port: 30001
+      targetPort: 30001
+      protocol: TCP
+      name: http-www
+  selector:
+    app.kubernetes.io/name: pipelines
+    app.kubernetes.io/instance: jfrog
+    component: jfrog-pipelines-services
+---
+# Source: jfrog-platform/charts/pipelines/templates/www-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: jfrog-pipelines-www
+  labels:
+    helm.sh/chart: pipelines-101.40.5
+    app.kubernetes.io/name: pipelines
+    app.kubernetes.io/instance: jfrog
+    app.kubernetes.io/version: "1.40.5"
+    app.kubernetes.io/managed-by: Helm
+    component: jfrog-pipelines-www
+    app: pipelines
+    chart: pipelines-101.40.5
+    heritage: Helm
+    release: jfrog
+spec:
+  type: ClusterIP
+  ports:
+    - port: 30001
+      targetPort: 30001
+      protocol: TCP
+      name: http-www
+  selector:
+    app.kubernetes.io/name: pipelines
+    app.kubernetes.io/instance: jfrog
+    component: jfrog-pipelines-services
+---
+# Source: jfrog-platform/charts/postgresql/templates/svc-headless.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: jfrog-postgresql-headless
+  labels:
+    app.kubernetes.io/name: postgresql
+    helm.sh/chart: postgresql-10.3.18
+    app.kubernetes.io/instance: jfrog
+    app.kubernetes.io/managed-by: Helm
+    # Use this annotation in addition to the actual publishNotReadyAddresses
+    # field below because the annotation will stop being respected soon but the
+    # field is broken in some versions of Kubernetes:
+    # https://github.com/kubernetes/kubernetes/issues/58662
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+  namespace: default
+spec:
+  type: ClusterIP
+  clusterIP: None
+  # We want all pods in the StatefulSet to have their addresses published for
+  # the sake of the other Postgresql pods even before they're ready, since they
+  # have to be able to talk to each other in order to become ready.
+  publishNotReadyAddresses: true
+  ports:
+    - name: tcp-postgresql
+      port: 5432
+      targetPort: tcp-postgresql
+  selector:
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/instance: jfrog
+---
+# Source: jfrog-platform/charts/postgresql/templates/svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: jfrog-postgresql
+  labels:
+    app.kubernetes.io/name: postgresql
+    helm.sh/chart: postgresql-10.3.18
+    app.kubernetes.io/instance: jfrog
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+  namespace: default
+spec:
+  type: ClusterIP
+  ports:
+    - name: tcp-postgresql
+      port: 5432
+      targetPort: tcp-postgresql
+  selector:
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/instance: jfrog
+    role: primary
+---
+# Source: jfrog-platform/charts/rabbitmq/templates/svc-headless.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: jfrog-rabbitmq-headless
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: rabbitmq
+    helm.sh/chart: rabbitmq-11.9.3
+    app.kubernetes.io/instance: jfrog
+    app.kubernetes.io/managed-by: Helm
+spec:
+  clusterIP: None
+  ports:
+    - name: epmd
+      port: 4369
+      targetPort: epmd
+    - name: amqp
+      port: 5672
+      targetPort: amqp
+    - name: dist
+      port: 25672
+      targetPort: dist
+    - name: http-stats
+      port: 15672
+      targetPort: stats
+  selector: 
+    app.kubernetes.io/name: rabbitmq
+    app.kubernetes.io/instance: jfrog
+  publishNotReadyAddresses: true
+---
+# Source: jfrog-platform/charts/rabbitmq/templates/svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: jfrog-rabbitmq
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: rabbitmq
+    helm.sh/chart: rabbitmq-11.9.3
+    app.kubernetes.io/instance: jfrog
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  sessionAffinity: None
+  ports:
+    - name: amqp
+      port: 5672
+      targetPort: amqp
+      nodePort: null
+    - name: epmd
+      port: 4369
+      targetPort: epmd
+      nodePort: null
+    - name: dist
+      port: 25672
+      targetPort: dist
+      nodePort: null
+    - name: http-stats
+      port: 15672
+      targetPort: stats
+      nodePort: null
+  selector: 
+    app.kubernetes.io/name: rabbitmq
+    app.kubernetes.io/instance: jfrog
+---
+# Source: jfrog-platform/charts/redis/templates/headless-svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: jfrog-redis-headless
+  namespace: "default"
+  labels:
+    app: redis
+    chart: redis-12.10.1
+    release: jfrog
+    heritage: Helm
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: tcp-redis
+      port: 6379
+      targetPort: redis
+  selector:
+    app: redis
+    release: jfrog
+---
+# Source: jfrog-platform/charts/redis/templates/redis-master-svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: jfrog-redis-master
+  namespace: "default"
+  labels:
+    app: redis
+    chart: redis-12.10.1
+    release: jfrog
+    heritage: Helm
+spec:
+  type: ClusterIP
+  
+  ports:
+    - name: tcp-redis
+      port: 6379
+      targetPort: redis
+  selector:
+    app: redis
+    release: jfrog
+    role: master
+---
+# Source: jfrog-platform/charts/xray/templates/xray-svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: jfrog-xray
+  labels:
+    app: xray
+    chart: xray-103.76.7
+    component: xray
+    heritage: Helm
+    release: jfrog
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    protocol: TCP
+    name: http
+    targetPort: 8000
+  - port: 8082
+    protocol: TCP
+    name: http-router
+    targetPort: 8082
+  selector:
+    app: xray
+    component: xray
+    release: jfrog
+---
+# Source: jfrog-platform/charts/artifactory/templates/nginx-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jfrog-artifactory-nginx
+  labels:
+    app: artifactory
+    chart: artifactory-107.59.11
+    heritage: Helm
+    release: jfrog
+    component: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: artifactory
+      release: jfrog
+      component: nginx
+  template:
+    metadata:
+      annotations:
+        checksum/nginx-conf: cbd04a405dd03e6655fab5e7dc8b5a8a231121d9df5f8ff10f06dd8a1507cb3b
+        checksum/nginx-artifactory-conf: 043ff68f30527cc1d593b2b102c0fa1d30f0f64dd5fc50bd0c4b402f75f07f99
+      labels:
+        app: artifactory
+        chart: artifactory-107.59.11
+        component: nginx
+        heritage: Helm
+        release: jfrog
+    spec:
+      serviceAccountName: default
+      terminationGracePeriodSeconds: 30
+      initContainers:
+      - name: "setup"
+        image: "releases-docker.jfrog.io/ubi9/ubi-minimal:9.1.0.1793"
+        imagePullPolicy: IfNotPresent
+        command:
+        - '/bin/sh'
+        - '-c'
+        - >
+          rm -rfv /var/opt/jfrog/nginx/lost+found;
+          mkdir -p /var/opt/jfrog/nginx/logs;
+        volumeMounts:
+        - mountPath: "/var/opt/jfrog/nginx"
+          name: nginx-volume
+      securityContext:
+        runAsUser: 104
+        fsGroup: 107
+      containers:
+      - name: nginx
+        image: releases-docker.jfrog.io/jfrog/nginx-artifactory-pro:7.59.11
+        imagePullPolicy: IfNotPresent
+        command:          
+          - nginx
+          - -g
+          - 'daemon off;'
+        ports:
+
+        # DEPRECATION NOTE: The following is to maintain support for values pre 1.3.1 and
+        # will be cleaned up in a later version
+        - containerPort: 80
+          name: http
+        - containerPort: 443
+          name: https
+        volumeMounts:
+        - name: nginx-conf
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+        - name: nginx-artifactory-conf
+          mountPath: "/var/opt/jfrog/nginx/conf.d/"
+        - name: nginx-volume
+          mountPath: "/var/opt/jfrog/nginx"  
+        - name: ssl-certificates
+          mountPath: "/var/opt/jfrog/nginx/ssl"  
+        resources:
+          {}
+        startupProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - curl -s -k --fail --max-time 5 http://localhost:80/router/api/v1/system/readiness
+          initialDelaySeconds: 30
+          failureThreshold: 90
+          periodSeconds: 5
+          timeoutSeconds: 5
+          
+        readinessProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - curl -s -k --fail --max-time 5 http://localhost:80/router/api/v1/system/readiness
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 5
+          successThreshold: 1
+          
+        livenessProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - curl -s -k --fail --max-time 5 http://localhost:80/
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 5
+          successThreshold: 1
+          
+      volumes:
+      - name: nginx-conf
+        configMap:
+          name: jfrog-artifactory-nginx-conf
+      - name: nginx-artifactory-conf
+        configMap:
+          name: jfrog-artifactory-nginx-artifactory-conf
+      - name: nginx-volume
+        emptyDir: {}
+      - name: ssl-certificates
+        secret:
+          secretName: jfrog-artifactory-nginx-certificate
+---
+# Source: jfrog-platform/charts/artifactory/templates/artifactory-statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: jfrog-artifactory
+  labels:
+    app: artifactory
+    chart: artifactory-107.59.11
+    component: artifactory
+    heritage: Helm
+    release: jfrog
+spec:
+  serviceName: artifactory
+  replicas: 1
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: artifactory
+      role: artifactory
+      release: jfrog
+  template:
+    metadata:
+      labels:
+        app: artifactory
+        chart: artifactory-107.59.11
+        heritage: Helm
+        role: artifactory
+        component: artifactory
+        release: jfrog
+      annotations:
+        checksum/database-secrets: cd2baf4a782b6aba120bdb4d9bb69d5c67f7c26855f5aacdce50399854f377c6
+        checksum/binarystore: ab9dc62620ef470a47e2eb441737b9cdf22d220a592bf873a18617bed1f85781
+        checksum/systemyaml: 2e586528d20a9e2b870b3a0e1873c1482f60bdbe4f6e299cb7dbd502f8a511fa
+        checksum/access-config: 90aa101ee7503f7acb9041c5c6f4305b638b49754e383bffa736956f1fbb22c7
+        checksum/admin-creds: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    spec:
+      serviceAccountName: default
+      terminationGracePeriodSeconds: 40
+      securityContext:
+        runAsUser: 1030
+        fsGroup: 1030
+      initContainers:
+      
+      - name: postgres-setup-init
+        image: releases-docker.jfrog.io/postgres:13.10-alpine
+        imagePullPolicy: Always
+        command:
+          - '/bin/bash'
+          - '-c'
+          - >
+            echo "Running init db scripts";
+            bash /scripts/setupPostgres.sh
+        env:
+          - name: PGUSERNAME
+            value: postgres
+          - name: DB_HOST
+            value: jfrog-postgresql
+          - name: DB_PORT
+            value: "5432"
+          - name: DB_SSL_MODE
+            value: "disable"
+          - name: DB_NAME
+            value: artifactory
+          - name: DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: jfrog-artifactory-database-creds
+                key: db-user
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: jfrog-artifactory-database-creds
+                key: db-password
+          - name: PGPASSWORD
+            value: postgres
+          - name: CHART_NAME
+            value: artifactory
+        volumeMounts:
+          - name: postgres-setup-init-vol
+            mountPath: "/scripts"
+      
+      - name: "delete-db-properties"
+        image: "releases-docker.jfrog.io/ubi9/ubi-minimal:9.1.0.1793"
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - NET_RAW
+        resources:
+          limits:
+            cpu: "1"
+            memory: 1Gi
+          requests:
+            cpu: 10m
+            memory: 50Mi
+        command:
+          - 'bash'
+          - '-c'
+          - 'rm -fv /var/opt/jfrog/artifactory/etc/db.properties'
+        volumeMounts:
+          - name: artifactory-volume
+            mountPath: "/var/opt/jfrog/artifactory"
+      - name: 'copy-system-configurations'
+        image: 'releases-docker.jfrog.io/ubi9/ubi-minimal:9.1.0.1793'
+        securityContext:
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - NET_RAW
+        resources:
+          limits:
+            cpu: "1"
+            memory: 1Gi
+          requests:
+            cpu: 10m
+            memory: 50Mi
+        command:
+        - '/bin/bash'
+        - '-c'
+        - >
+          if [[ -e "/var/opt/jfrog/artifactory/etc/filebeat.yaml" ]]; then chmod 644 /var/opt/jfrog/artifactory/etc/filebeat.yaml; fi;
+          echo "Copy system.yaml to /var/opt/jfrog/artifactory/etc";
+          mkdir -p /var/opt/jfrog/artifactory/etc;
+          mkdir -p /var/opt/jfrog/artifactory/etc/access/keys/trusted;
+          cp -fv /tmp/etc/system.yaml /var/opt/jfrog/artifactory/etc/system.yaml;
+          echo "Copy binarystore.xml file";
+          mkdir -p /var/opt/jfrog/artifactory/etc/artifactory;
+          cp -fv /tmp/etc/artifactory/binarystore.xml /var/opt/jfrog/artifactory/etc/artifactory/binarystore.xml;
+          echo "Copy access.config.patch.yml to /var/opt/jfrog/artifactory/etc/access";
+          mkdir -p /var/opt/jfrog/artifactory/etc/access;
+          cp -fv /tmp/etc/access.config.patch.yml /var/opt/jfrog/artifactory/etc/access/access.config.patch.yml;
+          echo "Copy joinKey to /var/opt/jfrog/artifactory/bootstrap/access/etc/security";
+          mkdir -p /var/opt/jfrog/artifactory/bootstrap/access/etc/security;
+          echo -n ${ARTIFACTORY_JOIN_KEY} > /var/opt/jfrog/artifactory/bootstrap/access/etc/security/join.key;
+          echo "Copy masterKey to /var/opt/jfrog/artifactory/etc/security";
+          mkdir -p /var/opt/jfrog/artifactory/etc/security;
+          echo -n ${ARTIFACTORY_MASTER_KEY} > /var/opt/jfrog/artifactory/etc/security/master.key;
+        env:
+        - name: ARTIFACTORY_JOIN_KEY
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-artifactory
+              key: join-key
+        - name: ARTIFACTORY_MASTER_KEY
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-artifactory
+              key: master-key
+        volumeMounts:
+        - name: artifactory-volume
+          mountPath: "/var/opt/jfrog/artifactory"
+        - name: systemyaml
+          mountPath: "/tmp/etc/system.yaml"
+          subPath: "system.yaml"
+        - name: binarystore-xml
+          mountPath: "/tmp/etc/artifactory/binarystore.xml"
+          subPath: binarystore.xml
+        - name: access-config
+          mountPath: "/tmp/etc/access.config.patch.yml"
+          subPath: "access.config.patch.yml"
+      containers:
+      - name: artifactory
+        image: releases-docker.jfrog.io/jfrog/artifactory-pro:7.59.11
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - NET_RAW
+        command:
+        - '/bin/bash'
+        - '-c'
+        - >
+          set -e;
+          if [ -d /artifactory_extra_conf ] && [ -d /artifactory_bootstrap ]; then
+            echo "Copying bootstrap config from /artifactory_extra_conf to /artifactory_bootstrap";
+            cp -Lrfv /artifactory_extra_conf/ /artifactory_bootstrap/;
+          fi;
+          exec /entrypoint-artifactory.sh
+        env:
+        - name: SKIP_WAIT_FOR_EXTERNAL_DB
+          value: "true"
+        - name: JF_SHARED_DATABASE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-artifactory-database-creds
+              key: db-user
+      
+        - name: JF_SHARED_DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-artifactory-database-creds
+              key: db-password
+        - name: JF_SHARED_DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-artifactory-database-creds
+              key: db-url
+        ports:
+        - containerPort: 8082
+          name: http
+        - containerPort: 8081
+          name: http-internal
+        volumeMounts:
+        - name: artifactory-volume
+          mountPath: "/var/opt/jfrog/artifactory"
+        - name: binarystore-xml
+          mountPath: "/tmp/etc/artifactory/binarystore.xml"
+          subPath: binarystore.xml
+        - name: installer-info
+          mountPath: "/artifactory_bootstrap/info/installer-info.json"
+          subPath: installer-info.json
+        startupProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - curl -s -k --fail --max-time 5 http://localhost:8091/artifactory/api/v1/system/readiness
+          initialDelaySeconds: 10
+          failureThreshold: 90
+          periodSeconds: 5
+          timeoutSeconds: 5
+          
+        livenessProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - curl -s -k --fail --max-time 5 http://localhost:8091/artifactory/api/v1/system/liveness
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 5
+          successThreshold: 1
+          
+      
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels:
+                    app: artifactory
+                    release: jfrog
+      volumes:
+      ########## External secrets ###########
+      # ca-certs secret
+
+      # aws licence
+
+      # binarystore-xml secret
+
+      # access-certs secrets
+
+      # system yaml
+
+      # artifactory license secrets
+      
+      # user Plugin Secrets
+
+      # access bootstarp
+
+      # gcpcreds secret
+
+      ############ Config map, Volumes and Custom Volumes ##############
+      
+      - name: postgres-setup-init-vol
+        configMap:
+          name: jfrog-setup-script
+      
+      - name: installer-info
+        configMap:
+          name: jfrog-artifactory-installer-info
+
+    #########  unifiedSecretInstallation ###########
+      ############ If single secret installation flag is disable ############
+      - name: systemyaml
+        secret:
+          secretName: jfrog-artifactory-systemyaml
+      - name: access-config
+        secret:
+          secretName: jfrog-artifactory-access-config
+      - name: binarystore-xml
+        secret:
+          secretName: jfrog-artifactory-binarystore
+    ########## volumeClaimTemplates #######
+  volumeClaimTemplates:
+  - metadata:
+      name: artifactory-volume
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 200Gi
+---
+# Source: jfrog-platform/charts/distribution/templates/distribution-statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: jfrog-distribution
+  labels:
+    app: distribution
+    chart: distribution-102.18.1
+    heritage: Helm
+    release: jfrog
+    component: distribution
+spec:
+  serviceName: jfrog-distribution-headless
+  replicas: 1
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: distribution
+      release: jfrog
+      role: distribution
+  template:
+    metadata:
+      labels:
+        app: distribution
+        chart: distribution-102.18.1
+        release: jfrog
+        role: distribution
+        component: distribution
+      annotations:
+        checksum/database-secrets: e915399353f43add9a9c0dc025a32c6725c8de3b000cead8956ef4a952686867
+        checksum/systemyaml: 228a5579a32863377eaba22c74794c912cfabc01336e56abdb2fd4b334b0d2f9
+    spec:
+      serviceAccountName: default
+      securityContext:
+        runAsUser: 1020
+        fsGroup: 1020
+      initContainers:
+      
+      - name: postgres-setup-init
+        image: releases-docker.jfrog.io/postgres:13.10-alpine
+        imagePullPolicy: Always
+        command:
+          - '/bin/bash'
+          - '-c'
+          - >
+            until nc -z -w 5 jfrog-artifactory 8082; do echo "Waiting for artifactory to start"; sleep 10; done;
+            echo "Running init db scripts";
+            bash /scripts/setupPostgres.sh
+        env:
+          - name: PGUSERNAME
+            value: postgres
+          - name: DB_HOST
+            value: jfrog-postgresql
+          - name: DB_PORT
+            value: "5432"
+          - name: DB_SSL_MODE
+            value: "disable"
+          - name: DB_NAME
+            value: distribution
+          - name: DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: jfrog-distribution-database-creds
+                key: db-user
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: jfrog-distribution-database-creds
+                key: db-password
+          - name: PGPASSWORD
+            value: postgres
+          - name: CHART_NAME
+            value: distribution
+        volumeMounts:
+          - name: postgres-setup-init-vol
+            mountPath: "/scripts"
+      
+      - name: 'copy-system-yaml'
+        image: 'releases-docker.jfrog.io/ubi9/ubi-minimal:9.1.0.1793'
+        securityContext:
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - NET_RAW
+        resources:
+          limits:
+            cpu: "1"
+            memory: 1Gi
+          requests:
+            cpu: 10m
+            memory: 50Mi
+        command:
+        - '/bin/bash'
+        - '-c'
+        - >
+          sleep 30;
+          if [[ -e "/var/opt/jfrog/distribution/etc/filebeat.yaml" ]]; then chmod 644 /var/opt/jfrog/distribution/etc/filebeat.yaml; fi;
+          echo "Copy system.yaml to /var/opt/jfrog/distribution/etc";
+          mkdir -p /var/opt/jfrog/distribution/etc;
+          cp -fv /tmp/etc/system.yaml /var/opt/jfrog/distribution/etc/system.yaml;
+          echo "Remove /var/opt/jfrog/distribution/lost+found folder if exists";
+          rm -rfv /var/opt/jfrog/distribution/lost+found;
+          echo "Copy joinKey to /var/opt/jfrog/distribution/etc/security";
+          mkdir -p /var/opt/jfrog/distribution/etc/security;
+          echo ${DISTRIBUTION_JOIN_KEY} > /var/opt/jfrog/distribution/etc/security/join.key;
+          echo "Copy masterKey to /var/opt/jfrog/distribution/etc/security";
+          mkdir -p /var/opt/jfrog/distribution/etc/security;
+          echo ${DISTRIBUTION_MASTER_KEY} > /var/opt/jfrog/distribution/etc/security/master.key;
+        env:
+        - name: DISTRIBUTION_JOIN_KEY
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-distribution
+              key: join-key
+        - name: DISTRIBUTION_MASTER_KEY
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-distribution
+              key: master-key
+        volumeMounts:
+        - name: distribution-data
+          mountPath: "/var/opt/jfrog/distribution"
+        - name: systemyaml
+          mountPath: "/tmp/etc/system.yaml"
+          subPath: system.yaml
+      containers:
+      - name: distribution
+        image: releases-docker.jfrog.io/jfrog/distribution-distribution:2.18.1
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1020
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - NET_RAW
+        ports:
+        - name: http-distro
+          containerPort: 8080
+        command:
+          - '/bin/bash'
+          - '-c'
+          - >
+            exec /opt/jfrog/distribution/app/bin/wrapper.sh;
+        env:
+        - name: JF_SHARED_DATABASE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-distribution-database-creds
+              key: db-user
+      
+        - name: JF_SHARED_DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-distribution-database-creds
+              key: db-password
+        - name: JF_SHARED_DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-distribution-database-creds
+              key: db-url
+        - name: JF_SHARED_REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-distribution
+              key: redis-password
+        - name: JF_SHARED_REDIS_CONNECTIONSTRING
+          value: 'redis://localhost:6379'
+        volumeMounts:
+        - name: distribution-data
+          mountPath: "/var/opt/jfrog/distribution"
+        resources:
+          {}
+        startupProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - curl --fail --max-time 5 http://localhost:8080/api/v1/system/readiness
+          initialDelaySeconds: 5
+          failureThreshold: 30
+          periodSeconds: 5
+          timeoutSeconds: 5
+          
+        livenessProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - curl --fail --max-time 5 http://localhost:8080/api/v1/system/liveness
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 5
+          successThreshold: 1
+          
+      - name: router
+        image: releases-docker.jfrog.io/jfrog/router:7.70.1
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - NET_RAW
+        command:
+          - '/bin/bash'
+          - '-c'
+          - >
+            exec /opt/jfrog/router/app/bin/entrypoint-router.sh;
+        env:
+        - name: JF_ROUTER_TOPOLOGY_LOCAL_REQUIREDSERVICETYPES
+          value: jfds,jfob
+        ports:
+          - name: http-router
+            containerPort: 8082
+        volumeMounts:
+        - name: distribution-data
+          mountPath: "/var/opt/jfrog/router"
+        resources:
+          {}
+        startupProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - curl -s -k --fail --max-time 5 http://localhost:8082/router/api/v1/system/readiness
+          initialDelaySeconds: 30
+          failureThreshold: 30
+          periodSeconds: 5
+          timeoutSeconds: 5
+          
+        livenessProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - curl -s -k --fail --max-time 5 http://localhost:8082/router/api/v1/system/liveness
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 5
+          successThreshold: 1
+          
+        readinessProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - curl -s -k --fail --max-time 5 http://localhost:8082/router/api/v1/system/readiness
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 5
+          successThreshold: 1
+          
+      - name: observability
+        image: releases-docker.jfrog.io/jfrog/observability:1.13.1
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - NET_RAW
+        command:
+          - '/bin/sh'
+          - '-c'
+          - >
+            exec /opt/jfrog/observability/app/bin/entrypoint-observability.sh;
+        volumeMounts:
+        - name: distribution-data
+          mountPath: "/var/opt/jfrog/observability"
+        resources:
+          {}
+        startupProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - curl --fail --max-time 5 http://localhost:8036/api/v1/system/readiness
+          initialDelaySeconds: 30
+          failureThreshold: 90
+          periodSeconds: 5
+          timeoutSeconds: 5
+          
+        livenessProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - curl --fail --max-time 5 http://localhost:8036/api/v1/system/liveness
+          initialDelaySeconds: 0
+          failureThreshold: 5
+          timeoutSeconds: 5
+          periodSeconds: 10
+          successThreshold: 1
+          
+      - name: redis
+        image: releases-docker.jfrog.io/bitnami/redis:7.0.9-debian-11-r6
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - NET_RAW
+        env:
+        - name: REDIS_REPLICATION_MODE
+          value: master
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-distribution
+              key: redis-password
+        - name: REDIS_PORT
+          value: "6379"
+        - name: REDIS_DISABLE_COMMANDS
+          value: FLUSHDB,FLUSHALL
+        ports:
+        - name: redis
+          containerPort: 6379
+        readinessProbe:
+          initialDelaySeconds: 10
+          timeoutSeconds: 5
+          exec:
+            command:
+            - redis-cli
+            - ping
+        livenessProbe:
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
+          exec:
+            command:
+            - redis-cli
+            - ping
+        resources:
+          {}
+        volumeMounts:
+        - name: redis-data
+          mountPath: /bitnami/redis/data
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels:
+                    app: distribution
+                    release: jfrog
+      volumes:
+
+      ########## External secrets ###########
+
+      #########  unifiedSecretInstallation ###########
+      ############ If single secret installation flag is disable ############
+      - name: systemyaml
+        secret:
+          secretName: jfrog-distribution-systemyaml
+
+      ############ Config map, Volumes and Custom Volumes ##############
+      
+      - name: postgres-setup-init-vol
+        configMap:
+          name: jfrog-setup-script
+      
+      - name: distribution-data
+        emptyDir:
+          sizeLimit: 50Gi
+  volumeClaimTemplates:
+    - metadata:
+        name: redis-data
+      spec:
+        accessModes: [ 'ReadWriteOnce' ]
+        resources:
+          requests:
+            storage: 10Gi
+---
+# Source: jfrog-platform/charts/insight/templates/insight-statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: jfrog-insight
+  labels:
+    app: insight
+    chart: insight-101.14.0
+    component: insight-server
+    heritage: Helm
+    release: jfrog
+spec:
+  serviceName: jfrog-insight
+  replicas: 1
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: insight
+      component: insight-server
+      release: jfrog
+  template:
+    metadata:
+      labels:
+        app: insight
+        component: insight-server
+        release: jfrog
+      annotations:
+        checksum/database-secrets: d8d789ad26992f50bdd3e915c66680e72c71f6078a71729d713eda0d40bb7ac8
+        checksum/systemyaml: 4788e6b393e2ec51b15610d4d4559f485d5a80300cc50a64a019a9ab6eb0d3bd
+    spec:
+      serviceAccountName: default
+      securityContext:
+        runAsUser: 1040
+        fsGroup: 1040
+      initContainers:
+      
+      - name: postgres-setup-init
+        image: releases-docker.jfrog.io/postgres:13.10-alpine
+        imagePullPolicy: Always
+        command:
+          - '/bin/bash'
+          - '-c'
+          - >
+            until nc -z -w 5 jfrog-artifactory 8082; do echo "Waiting for artifactory to start"; sleep 10; done;
+            echo "Running init db scripts";
+            bash /scripts/setupPostgres.sh
+        env:
+          - name: PGUSERNAME
+            value: postgres
+          - name: DB_HOST
+            value: jfrog-postgresql
+          - name: DB_PORT
+            value: "5432"
+          - name: DB_SSL_MODE
+            value: "disable"
+          - name: DB_NAME
+            value: insight
+          - name: DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: jfrog-insight-database-creds
+                key: db-user
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: jfrog-insight-database-creds
+                key: db-password
+          - name: PGPASSWORD
+            value: postgres
+          - name: CHART_NAME
+            value: insight
+        volumeMounts:
+          - name: postgres-setup-init-vol
+            mountPath: "/scripts"
+      
+      - name: elasticsearch-init
+        image: "releases-docker.jfrog.io/jfrog/elasticsearch-sg:7.17.6"
+        securityContext:
+          runAsUser: 0
+          privileged: true
+          capabilities:
+            drop:
+              - NET_RAW
+        command:
+        - '/bin/sh'
+        - '-c'
+        - >
+          sysctl -w vm.max_map_count=262144
+        volumeMounts:
+        - name: elasticsearch-data
+          mountPath: "/usr/share/elasticsearch/data"
+        resources:
+          limits:
+            cpu: "1"
+            memory: 1Gi
+          requests:
+            cpu: 10m
+            memory: 50Mi
+      - name: copy-system-yaml
+        image: 'releases-docker.jfrog.io/ubi9/ubi-minimal:9.1.0.1793'
+        securityContext:
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - NET_RAW
+        command:
+        - 'bash'
+        - '-c'
+        - >
+          if [[ -e "/var/opt/jfrog/insight/etc/filebeat.yaml" ]]; then chmod 644 /var/opt/jfrog/insight/etc/filebeat.yaml; fi;
+          echo "Copy system.yaml to /var/opt/jfrog/insight/etc";
+          mkdir -p /var/opt/jfrog/insight/etc;
+          mkdir -p /var/opt/jfrog/insight/log/elasticsearch;
+          chmod 776 /var/opt/jfrog/insight/log/elasticsearch;
+          cp -fv /tmp/etc/system.yaml /var/opt/jfrog/insight/etc/system.yaml;
+          echo "Copy application.yaml to /var/opt/jfrog/insight/bootstrap/insight";
+          mkdir -p /var/opt/jfrog/insight/bootstrap/insight;
+          cp -fv /tmp/etc/application.yaml /var/opt/jfrog/insight/bootstrap/insight/application.yaml;
+          echo "Remove /var/opt/jfrog/insight/lost+found folder if exists";
+          rm -rfv /var/opt/jfrog/insight/lost+found;
+          echo "Copy joinKey to /var/opt/jfrog/insight/etc/security";
+          mkdir -p /var/opt/jfrog/insight/etc/security;
+          echo ${INSIGHT_JOIN_KEY} > /var/opt/jfrog/insight/etc/security/join.key;
+          echo "Copy masterKey to /var/opt/jfrog/insight/etc/security";
+          mkdir -p /var/opt/jfrog/insight/etc/security;
+          echo ${INSIGHT_MASTER_KEY} > /var/opt/jfrog/insight/etc/security/master.key;
+        env:
+        - name: INSIGHT_JOIN_KEY
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-insight
+              key: join-key
+        - name: INSIGHT_MASTER_KEY
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-insight
+              key: master-key
+        volumeMounts:
+        - name: insight-data
+          mountPath: "/var/opt/jfrog/insight"
+        - name: systemyaml
+          mountPath: "/tmp/etc/system.yaml"
+          subPath: system.yaml
+        resources:
+          limits:
+            cpu: "1"
+            memory: 1Gi
+          requests:
+            cpu: 10m
+            memory: 50Mi
+      containers:
+      - name: elasticsearch
+        image: releases-docker.jfrog.io/jfrog/elasticsearch-sg:7.17.6
+        imagePullPolicy: 
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - NET_RAW
+        command:
+        - '/bin/sh'
+        - '-c'
+        - >
+          sleep 10;
+          if [[ $insight_server_pod_name == *"-0"* ]] ; then echo "Setting clustersetup to no" && export ELASTICSEARCH_CLUSTERSETUP=NO; else echo "Setting clustersetup to yes" && export ELASTICSEARCH_CLUSTERSETUP=YES; fi;
+          (/usr/local/bin/initializeSearchGuard.sh &) && docker-entrypoint.sh 'elasticsearch';
+        env:
+        - name: 'insight_server_pod_name'
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: 'cluster.name'
+          value: 'es-cluster'
+        - name: 'xpack.security.enabled'
+          value: 'false'
+        - name: 'path.logs'
+          value: '/var/opt/jfrog/insight/log/elasticsearch'
+        - name: 'network.host'
+          value: '0.0.0.0'
+        - name: 'transport.host'
+          value: '0.0.0.0'
+        - name: 'transport.port'
+          value: '9300'
+        - name: 'discovery.seed_hosts'
+          value: 'jfrog-insight'
+        - name: 'cluster.initial_master_nodes'
+          value: 'jfrog-insight-0,'
+        - name: ELASTICSEARCH_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-insight-elasticsearch-cred
+              key: password
+        - name: ELASTICSEARCH_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-insight-elasticsearch-cred
+              key: username
+        - name: JF_SHARED_ELASTICSEARCH_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-insight-elasticsearch-cred
+              key: username
+        - name: JF_SHARED_ELASTICSEARCH_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-insight-elasticsearch-cred
+              key: password
+        - name: ES_JAVA_OPTS
+          value: "
+              -Xms2g
+              -Xmx2g
+          "
+        - name: JF_SHARED_ELASTICSEARCH_URL
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-insight-elasticsearch-cred
+              key: url
+        ports:
+        - name: tcp-estransprt
+          containerPort: 9300
+        volumeMounts:
+        - name: elasticsearch-data
+          mountPath: "/usr/share/elasticsearch/data"
+        - name: insight-data
+          mountPath: "/var/opt/jfrog/insight"
+        resources:
+          {}
+        startupProbe:
+          httpGet:
+            path: /_cluster/health
+            port: 9200
+          initialDelaySeconds: 30
+          failureThreshold: 30
+          periodSeconds: 5
+          
+        livenessProbe:
+          httpGet:
+            path: /_cluster/health
+            port: 9200
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          timeoutSeconds: 10
+          failureThreshold: 3
+          successThreshold: 1
+          
+        readinessProbe:
+          httpGet:
+            path: /_cluster/health
+            port: 9200
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          timeoutSeconds: 10
+          failureThreshold: 5
+          successThreshold: 1
+          
+      - name: router
+        image: releases-docker.jfrog.io/jfrog/router:7.70.1
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - NET_RAW
+        command:
+        - '/bin/bash'
+        - '-c'
+        - >
+          exec /opt/jfrog/router/app/bin/entrypoint-router.sh;
+        env:
+        - name: JF_ROUTER_TOPOLOGY_LOCAL_REQUIREDSERVICETYPES
+          value: jfisc,jfisv,jfesc
+        ports:
+        - name: http-router
+          containerPort: 8082
+        volumeMounts:
+        - name: insight-data
+          mountPath: "/var/opt/jfrog/router"
+        resources:
+          {}
+        startupProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - curl -s -k --fail --max-time 10 http://localhost:8082/router/api/v1/system/readiness
+          initialDelaySeconds: 30
+          failureThreshold: 30
+          periodSeconds: 5
+          timeoutSeconds: 10
+          
+        livenessProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - curl -s -k --fail --max-time 10 http://localhost:8082/router/api/v1/system/liveness
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          timeoutSeconds: 10
+          failureThreshold: 3
+          successThreshold: 1
+          
+        readinessProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - curl -s -k --fail --max-time 10 http://localhost:8082/router/api/v1/system/readiness
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          timeoutSeconds: 10
+          failureThreshold: 5
+          successThreshold: 1
+          
+      - name: insight-server
+        image: releases-docker.jfrog.io/jfrog/insight-server:1.14.0
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - NET_RAW
+        command:
+        - '/bin/bash'
+        - '-c'
+        - >
+          exec /opt/jfrog/insight/app/bin/entrypoint-server.sh;
+        env:
+        - name: JF_SHARED_DATABASE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-insight-database-creds
+              key: db-user
+      
+        - name: JF_SHARED_DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-insight-database-creds
+              key: db-password
+        - name: JF_SHARED_DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-insight-database-creds
+              key: db-url
+        ports:
+        - containerPort: 8087
+          protocol: TCP
+          name: http-insight
+        volumeMounts:
+        - name: insight-data
+          mountPath: "/var/opt/jfrog/insight"
+        resources:
+          {}
+        startupProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - curl -s -k --fail --max-time 10 http://localhost:8087/api/v1/system/readiness
+          initialDelaySeconds: 0
+          failureThreshold: 30
+          periodSeconds: 5
+          timeoutSeconds: 10
+          
+        livenessProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - curl -s -k --fail --max-time 10 http://localhost:8087/api/v1/system/liveness
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          timeoutSeconds: 10
+          failureThreshold: 3
+          successThreshold: 1
+          
+      - name: insight-scheduler
+        image: releases-docker.jfrog.io/jfrog/insight-scheduler:1.14.0
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - NET_RAW
+        env:
+        - name: JF_SHARED_DATABASE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-insight-database-creds
+              key: db-user
+      
+        - name: JF_SHARED_DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-insight-database-creds
+              key: db-password
+        - name: JF_SHARED_DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-insight-database-creds
+              key: db-url
+        ports:
+        - containerPort: 8085
+          protocol: TCP
+          name: http-insched
+        volumeMounts:
+        - name: insight-data
+          mountPath: "/var/opt/jfrog/insight"
+        resources:
+          {}
+        startupProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - curl -s -k --fail --max-time 10 http://localhost:8085/api/v1/system/readiness
+          initialDelaySeconds: 0
+          failureThreshold: 30
+          periodSeconds: 5
+          timeoutSeconds: 10
+          
+        livenessProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - curl -s -k --fail --max-time 10 http://localhost:8085/api/v1/system/liveness
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          timeoutSeconds: 10
+          failureThreshold: 3
+          successThreshold: 1
+          
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels:
+                    app: insight
+                    release: jfrog
+      volumes:
+
+      ########## External secrets ###########
+
+      ############ Config map, Volumes and Custom Volumes ##############
+      
+      - name: postgres-setup-init-vol
+        configMap:
+          name: jfrog-setup-script
+      
+
+    #########  unifiedSecretInstallation ###########
+      - name: systemyaml
+        secret:
+          secretName: jfrog-insight-systemyaml
+
+  volumeClaimTemplates:
+    - metadata:
+        name: insight-data
+      spec:
+        accessModes: [ 'ReadWriteOnce' ]
+        resources:
+          requests:
+            storage: 100Gi
+    - metadata:
+        name: elasticsearch-data
+      spec:
+        accessModes: [ 'ReadWriteOnce' ]
+        resources:
+          requests:
+            storage: 100Gi
+---
+# Source: jfrog-platform/charts/pipelines/charts/vault/templates/server-statefulset.yaml
+# StatefulSet to run the actual vault server cluster.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: jfrog-vault
+  namespace: default
+  labels:
+    app.kubernetes.io/name: vault
+    app.kubernetes.io/instance: jfrog
+    app.kubernetes.io/managed-by: Helm
+spec:
+  serviceName: jfrog-vault-internal
+  podManagementPolicy: Parallel
+  replicas: 1
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: vault
+      app.kubernetes.io/instance: jfrog
+      component: server
+  template:
+    metadata:
+      labels:
+        helm.sh/chart: vault-0.16.1
+        app.kubernetes.io/name: vault
+        app.kubernetes.io/instance: jfrog
+        component: server
+    spec:
+      
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: vault
+                  app.kubernetes.io/instance: "jfrog"
+                  component: server
+              topologyKey: kubernetes.io/hostname
+  
+      
+      
+      terminationGracePeriodSeconds: 10
+      serviceAccountName: vault
+      
+      securityContext:
+        runAsNonRoot: true
+        runAsGroup: 1000
+        runAsUser: 100
+        fsGroup: 1000
+      volumes:
+        
+        - name: config
+          configMap:
+            name: jfrog-vault-config
+  
+        - name: userconfig-vault-storage-config
+          secret:
+            secretName: vault-storage-config
+            defaultMode: 420
+        - name: home
+          emptyDir: {}
+      initContainers:
+        
+        - command:
+          - sh
+          - -c
+          - |
+            echo "Waiting for Postgres to come up..."; export PIPELINES_PG_HOST=$(echo "${CONNECTION_DETAILS}"  | head -n1 | cut -d " " -f1); export PIPELINES_PG_PORT=$(echo "${CONNECTION_DETAILS}"  | head -n1 | cut -d " " -f2); echo "postgres host : ${PIPELINES_PG_HOST}"; echo "postgres port : ${PIPELINES_PG_PORT}"; until pg_isready -h ${PIPELINES_PG_HOST} -p ${PIPELINES_PG_PORT} -U pipelines && echo database ok; do
+              sleep 2;
+            done;
+          env:
+          - name: CONNECTION_DETAILS
+            valueFrom:
+              secretKeyRef:
+                key: postgresql-connection
+                name: vault-storage-config
+          image: releases-docker.jfrog.io/bitnami/postgresql:13.9.0-debian-11-r11
+          imagePullPolicy: IfNotPresent
+          name: vault-wait-for-db
+          resources:
+            limits:
+              cpu: 50m
+              memory: 50Mi
+            requests:
+              cpu: 10m
+              memory: 10Mi
+        - command:
+          - sh
+          - -c
+          - |
+            echo "Creating Vault Tables..."; psql ${DATABASE_URL} -f /vault/userconfig/vault-storage-config/vault.sql; psql ${DATABASE_URL} -c "\dt;";
+          env:
+          - name: DATABASE_URL
+            valueFrom:
+              secretKeyRef:
+                key: postgresql-url
+                name: vault-storage-config
+          image: releases-docker.jfrog.io/bitnami/postgresql:13.9.0-debian-11-r11
+          imagePullPolicy: IfNotPresent
+          name: create-vault-table
+          resources:
+            limits:
+              cpu: 50m
+              memory: 50Mi
+            requests:
+              cpu: 10m
+              memory: 10Mi
+          volumeMounts:
+          - mountPath: /vault/userconfig/vault-storage-config
+            name: userconfig-vault-storage-config
+      containers:
+        - name: vault
+          
+          image: releases-docker.jfrog.io/hashicorp/vault:1.8.6
+          imagePullPolicy: IfNotPresent
+          command:
+          - "/bin/sh"
+          - "-ec"
+          args: 
+          - |
+            cp /vault/config/extraconfig-from-values.hcl /tmp/storageconfig.hcl;
+            [ -n "${HOST_IP}" ] && sed -Ei "s|HOST_IP|${HOST_IP?}|g" /tmp/storageconfig.hcl;
+            [ -n "${POD_IP}" ] && sed -Ei "s|POD_IP|${POD_IP?}|g" /tmp/storageconfig.hcl;
+            [ -n "${HOSTNAME}" ] && sed -Ei "s|HOSTNAME|${HOSTNAME?}|g" /tmp/storageconfig.hcl;
+            [ -n "${API_ADDR}" ] && sed -Ei "s|API_ADDR|${API_ADDR?}|g" /tmp/storageconfig.hcl;
+            [ -n "${TRANSIT_ADDR}" ] && sed -Ei "s|TRANSIT_ADDR|${TRANSIT_ADDR?}|g" /tmp/storageconfig.hcl;
+            [ -n "${RAFT_ADDR}" ] && sed -Ei "s|RAFT_ADDR|${RAFT_ADDR?}|g" /tmp/storageconfig.hcl;
+            /usr/local/bin/docker-entrypoint.sh vault server -config=/tmp/storageconfig.hcl -config=/vault/userconfig/vault-storage-config/config.hcl
+   
+          securityContext:
+            allowPrivilegeEscalation: false
+          env:
+            - name: HOST_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: VAULT_K8S_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: VAULT_K8S_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: VAULT_ADDR
+              value: "http://127.0.0.1:8200"
+            - name: VAULT_API_ADDR
+              value: "http://$(POD_IP):8200"
+            - name: SKIP_CHOWN
+              value: "true"
+            - name: SKIP_SETCAP
+              value: "true"
+            - name: HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: VAULT_CLUSTER_ADDR
+              value: "https://$(HOSTNAME).jfrog-vault-internal:8201"
+            - name: HOME
+              value: "/home/vault"
+            
+            
+            
+          volumeMounts:
+          
+  
+    
+  
+  
+            - name: config
+              mountPath: /vault/config
+  
+            - name: userconfig-vault-storage-config
+              readOnly: true
+              mountPath: /vault/userconfig/vault-storage-config
+            - name: home
+              mountPath: /home/vault
+          ports:
+            - containerPort: 8200
+              name: http
+            - containerPort: 8201
+              name: https-internal
+            - containerPort: 8202
+              name: http-rep
+          readinessProbe:
+            # Check status; unsealed vault servers return 0
+            # The exit code reflects the seal status:
+            #   0 - unsealed
+            #   1 - error
+            #   2 - sealed
+            exec:
+              command: ["/bin/sh", "-ec", "vault status -tls-skip-verify"]
+            failureThreshold: 2
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: "/v1/sys/health?standbyok=true"
+              port: 8200
+              scheme: HTTP
+            failureThreshold: 2
+            initialDelaySeconds: 50
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 3
+          lifecycle:
+            # Vault container doesn't receive SIGTERM from Kubernetes
+            # and after the grace period ends, Kube sends SIGKILL.  This
+            # causes issues with graceful shutdowns such as deregistering itself
+            # from Consul (zombie services).
+            preStop:
+              exec:
+                command: [
+                  "/bin/sh", "-c",
+                  # Adding a sleep here to give the pod eviction a
+                  # chance to propagate, so requests will not be made
+                  # to this pod while it's terminating
+                  "sleep 5 && kill -SIGTERM $(pidof vault)",
+                ]
+          
+        - env:
+          - name: CHECK_INTERVAL
+            value: 10s
+          - name: VAULT_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: VAULT_ADDRESS
+            value: http://localhost:8200
+          image: releases-docker.jfrog.io/jfrog/pipelines-vault-init:1.20.4
+          imagePullPolicy: IfNotPresent
+          name: vault-init
+          resources:
+            limits:
+              cpu: 50m
+              memory: 50Mi
+            requests:
+              cpu: 10m
+              memory: 10Mi
+---
+# Source: jfrog-platform/charts/pipelines/templates/pipelines-statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: jfrog-pipelines-services
+  labels:
+    helm.sh/chart: pipelines-101.40.5
+    app.kubernetes.io/name: pipelines
+    app.kubernetes.io/instance: jfrog
+    app.kubernetes.io/version: "1.40.5"
+    app.kubernetes.io/managed-by: Helm
+    app: pipelines
+    chart: pipelines-101.40.5
+    heritage: Helm
+    release: jfrog
+spec:
+  serviceName: jfrog-pipelines-services-headless
+  replicas: 1
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pipelines
+      app.kubernetes.io/instance: jfrog
+      component: jfrog-pipelines-services
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: pipelines
+        app.kubernetes.io/instance: jfrog
+        component: jfrog-pipelines-services
+        app: pipelines
+        chart: pipelines-101.40.5
+        heritage: Helm
+        release: jfrog
+      annotations:
+        checksum/systemyaml: afc74bfd11df1908add9b2955825e75e3ea70af377f441346abb1ad689bc115e
+        checksum/secretdb: c8c99144e1587eab7a32e6f36714434444f839fe677bcecc37b1a4c3a4d4b5ac
+        checksum/secretaws: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        checksum/secretk8s: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        checksum/configaws: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        checksum/configk8s: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        checksum/configfilebeat: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    spec:
+      serviceAccountName: default
+      initContainers:
+        
+        - name: postgres-setup-init
+          image: releases-docker.jfrog.io/postgres:13.10-alpine
+          imagePullPolicy: Always
+          command:
+            - '/bin/bash'
+            - '-c'
+            - >
+              until nc -z -w 5 jfrog-artifactory 8082; do echo "Waiting for artifactory to start"; sleep 10; done;
+              echo "Running init db scripts";
+              bash /scripts/setupPostgres.sh
+          env:
+            - name: PGUSERNAME
+              value: postgres
+            - name: DB_HOST
+              value: jfrog-postgresql
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_SSL_MODE
+              value: "disable"
+            - name: DB_NAME
+              value: pipelinesdb
+            - name: DB_USERNAME
+              value: apiuser
+            - name: DB_PASSWORD
+              value: pipeline
+            - name: PGPASSWORD
+              value: postgres
+            - name: CHART_NAME
+              value: pipelines
+          volumeMounts:
+            - name: postgres-setup-init-vol
+              mountPath: "/scripts"
+        
+        - name: copy-system-yaml
+          image: "releases-docker.jfrog.io/alpine:3.14.2"
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - NET_RAW
+          resources:
+
+            limits:
+              cpu: 50m
+              memory: 50Mi
+            requests:
+              cpu: 10m
+              memory: 10Mi
+          command:
+          - '/bin/sh'
+          - '-c'
+          - >
+            echo "Copy system.yaml to /opt/jfrog/pipelines/var/etc";
+            cp -fv /tmp/etc/system.yaml /opt/jfrog/pipelines/var/etc/system.yaml;
+          volumeMounts:
+          - name: jfrog-pipelines-folder
+            mountPath: /opt/jfrog/pipelines/var/etc
+          - name: systemyaml
+            mountPath: "/tmp/etc/system.yaml"
+            subPath: system.yaml
+        - name: wait-for-db
+          image: releases-docker.jfrog.io/bitnami/postgresql:13.9.0-debian-11-r11
+          imagePullPolicy: IfNotPresent
+          resources:
+
+            limits:
+              cpu: 50m
+              memory: 50Mi
+            requests:
+              cpu: 10m
+              memory: 10Mi
+          command:
+          - 'sh'
+          - '-c'
+          - >
+            echo "Waiting for Postgres to come up...";
+            until pg_isready -h jfrog-postgresql -p 5432  -U pipelines && echo database ok; do
+              sleep 1;
+            done;
+        - name: create-vault-table
+          image: releases-docker.jfrog.io/jfrog/pipelines-installer:1.40.5
+          imagePullPolicy: IfNotPresent
+          resources:
+
+            limits:
+              cpu: 50m
+              memory: 50Mi
+            requests:
+              cpu: 10m
+              memory: 10Mi
+          env:
+            - name: PIPELINES_SHARED_DB_CONNECTIONSTRING
+              valueFrom:
+                secretKeyRef:
+                  name: jfrog-pipelines-database
+                  key: postgresql-url
+          command:
+          - 'sh'
+          - '-c'
+          - >
+            echo "Copy system.yaml to /opt/jfrog/pipelines/var/etc";
+            cp -fv /tmp/etc/system.yaml /opt/jfrog/pipelines/var/etc/system.yaml;
+            echo "Creating Vault Table...";
+            ./pipelines-k8s initVault;
+          volumeMounts:
+          - name: jfrog-pipelines-folder
+            mountPath: /opt/jfrog/pipelines/var/etc
+          - name: systemyaml
+            mountPath: "/tmp/etc/system.yaml"
+            subPath: system.yaml
+        - name: wait-for-vault
+          image: "releases-docker.jfrog.io/alpine:3.14.2"
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - NET_RAW
+          resources:
+
+            limits:
+              cpu: 50m
+              memory: 50Mi
+            requests:
+              cpu: 10m
+              memory: 10Mi
+          command:
+          - 'sh'
+          - '-c'
+          - >
+            echo "Waiting for Vault to come up...";
+            until nc -z -w 2 jfrog-vault 8200 && echo Vault ok; do
+              sleep 2;
+            done;
+        - name: pipelines-installer
+          image: releases-docker.jfrog.io/jfrog/pipelines-installer:1.40.5
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              add:
+                - CHOWN
+              drop:
+                - NET_RAW
+          resources:
+
+            limits:
+              cpu: "1"
+              memory: 1Gi
+            requests:
+              cpu: 10m
+              memory: 50Mi
+          env:
+            - name: VAULT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: root-vault-secret
+                  key: token
+            - name: PIPELINES_SHARED_DB_CONNECTIONSTRING
+              valueFrom:
+                secretKeyRef:
+                  name: jfrog-pipelines-database
+                  key: postgresql-url
+            - name: PIPELINES_NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: "metadata.name"
+            - name: PIPELINES_MASTER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: "jfrog-pipelines"
+                  key: master-key
+            - name: PIPELINES_JOIN_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: "jfrog-pipelines"
+                  key: join-key
+          command:
+          - 'sh'
+          - '-c'
+          - >
+            export PIP_CONTAINER_START_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ");
+            export PIP_METRIC_FILE_PREFIX="services-pipelines-installer";
+            echo "Copy masterKey to /opt/jfrog/pipelines/var/etc/security";
+            mkdir -p /opt/jfrog/pipelines/var/etc/security;
+            echo -n ${PIPELINES_MASTER_KEY} > /opt/jfrog/pipelines/var/etc/security/master.key;
+            echo "Copy joinKey to /opt/jfrog/pipelines/var/etc/security";
+            mkdir -p /opt/jfrog/pipelines/var/etc/security;
+            echo -n ${PIPELINES_JOIN_KEY} > /opt/jfrog/pipelines/var/etc/security/join.key;
+            ./pipelines-k8s;
+
+            export new_script_path=/tmp/add_metrics.sh;
+            cp -fv /pipelines-utility-scripts/add_metrics.sh "${new_script_path}"; chmod +x "${new_script_path}";
+            bash "${new_script_path}" "${PIP_CONTAINER_START_TIME}" "/opt/jfrog/pipelines/var/log/${PIP_METRIC_FILE_PREFIX}-metrics.log" "kubernetes-init" || true;
+
+            chown 1066:1066 /opt/jfrog/pipelines/var/log/*-metrics.log || true;
+          volumeMounts:
+          - name: pipelines-utility-scripts
+            mountPath: "/pipelines-utility-scripts/"
+          - name: jfrog-pipelines-folder
+            mountPath: /opt/jfrog/pipelines/var/etc
+          - name: jfrog-pipelines-logs
+            mountPath: /opt/jfrog/pipelines/var/log
+      containers:
+        - name: router
+          image: releases-docker.jfrog.io/jfrog/pipelines-router:1.40.5
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - NET_RAW
+          env:
+            - name: JF_ROUTER_TOPOLOGY_LOCAL_REQUIREDSERVICETYPES
+              value: jfpip,jfob
+            - name: JF_ROUTER_SERVICEREGISTRY_URL
+              value: "http://jfrog-artifactory:8082/access"
+            - name: JF_ROUTER_SERVICEREGISTRY_GRPCADDRESS
+              value: ""
+            - name: JF_ROUTER_ENTRYPOINTS_INTERNALPORT
+              value: "8046"
+            - name: JF_ROUTER_ENTRYPOINTS_EXTERNALPORT
+              value: "8082"
+            - name: JF_ROUTER_LOGGING_ROUTER_LOGLEVEL
+              value: "DEBUG"
+            - name: JF_SHARED_NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: "metadata.name"
+            - name: JF_SHARED_NODE_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: "status.podIP"
+            - name: JF_SHARED_SECURITY_JOINKEY
+              value: EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+            - name: JF_ROUTER_ENCRYPTSYSTEMCONFIG
+              value: "true"
+          ports:
+            - name: http-router
+              containerPort: 8046
+          resources:
+            
+            {}
+          volumeMounts:
+          - name: jfrog-pipelines-folder
+            mountPath: /opt/jfrog/router/var/etc
+          - name: jfrog-pipelines-logs
+            mountPath: /opt/jfrog/router/var/log
+          - name: data-volume
+            mountPath: "/var/opt/jfrog/router/data"
+          startupProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - curl --fail --max-time 10 http://localhost:8046/router/api/v1/system/readiness
+            initialDelaySeconds: 0
+            periodSeconds: 5
+            timeoutSeconds: 10
+            failureThreshold: 30
+            
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - curl --fail --max-time 10 http://localhost:8046/router/api/v1/system/liveness
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 3
+            successThreshold: 1
+            
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - curl --fail --max-time 10 http://localhost:8046/router/api/v1/system/readiness
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 5
+            successThreshold: 1
+            
+        - name: observability
+          image: releases-docker.jfrog.io/jfrog/pipelines-observability:1.40.5
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsNonRoot: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - NET_RAW
+          env:
+            - name: JF_SHARED_SECURITY_MASTERKEY
+              valueFrom:
+                secretKeyRef:
+                  name: "jfrog-pipelines"
+                  key: master-key
+            - name: JF_SHARED_SECURITY_JOINKEY
+              valueFrom:
+                secretKeyRef:
+                  name: "jfrog-pipelines"
+                  key: join-key
+          resources:
+            
+            {}
+          volumeMounts:
+          - name: jfrog-pipelines-logs
+            mountPath: /opt/jfrog/observability/var/log
+          startupProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - curl --fail --max-time 10 http://localhost:8036/api/v1/system/readiness
+            initialDelaySeconds: 30
+            failureThreshold: 90
+            periodSeconds: 5
+            timeoutSeconds: 10
+            
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - curl --fail --max-time 10 http://localhost:8036/api/v1/system/liveness
+            initialDelaySeconds: 0
+            failureThreshold: 5
+            timeoutSeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            
+        - name: api
+          image: releases-docker.jfrog.io/jfrog/pipelines-api:1.40.5
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - NET_RAW
+          env:
+            - name: PIPELINES_NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: "metadata.name"
+          ports:
+            - name: http-api
+              containerPort: 30000
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - curl --fail --max-time 10 http://localhost:30000/v1/system/liveness
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 5
+            successThreshold: 1
+            
+          startupProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - curl --fail --max-time 10 http://localhost:30000/v1/system/readiness
+            initialDelaySeconds: 0
+            periodSeconds: 5
+            timeoutSeconds: 10
+            failureThreshold: 30
+            
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - curl --fail --max-time 10 http://localhost:30000/v1/system/readiness
+            initialDelaySeconds: 0
+            periodSeconds: 5
+            timeoutSeconds: 10
+            failureThreshold: 5
+            
+          resources:
+            {}
+          volumeMounts:
+          - name: jfrog-pipelines-folder
+            mountPath: /opt/jfrog/pipelines/var/etc
+          - name: jfrog-pipelines-logs
+            mountPath: /opt/jfrog/pipelines/var/log
+        - name: www
+          image: releases-docker.jfrog.io/jfrog/pipelines-www:1.40.5
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - NET_RAW
+          env:
+            - name: PIPELINES_NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: "metadata.name"
+          ports:
+            - name: http-www
+              containerPort: 30001
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - curl --fail --max-time 10 http://localhost:30001/v1/system/liveness
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 5
+            successThreshold: 1
+            
+          startupProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - curl --fail --max-time 10 http://localhost:30001/v1/system/readiness
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 5
+            successThreshold: 1
+            
+          resources:
+            {}
+          volumeMounts:
+          - name: jfrog-pipelines-folder
+            mountPath: /opt/jfrog/pipelines/var/etc
+          - name: jfrog-pipelines-logs
+            mountPath: /opt/jfrog/pipelines/var/log
+        - name: frontend
+          image: releases-docker.jfrog.io/jfrog/pipelines-frontend:1.40.5
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - NET_RAW
+          env:
+            - name: PIPELINES_NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: "metadata.name"
+          ports:
+          - containerPort: 30042
+            name: http-frontend
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - curl --fail --max-time 10 http://localhost:30042/index.html
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 5
+            successThreshold: 1
+            
+          resources:
+            {}
+          volumeMounts:
+          - name: jfrog-pipelines-folder
+            mountPath: /opt/jfrog/pipelines/var/etc
+          - name: jfrog-pipelines-logs
+            mountPath: /opt/jfrog/pipelines/var/log
+        - name: nodepoolservice
+          image: releases-docker.jfrog.io/jfrog/pipelines-nodepool-service:1.40.5
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - NET_RAW
+          env:
+            - name: PIPELINES_NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: "metadata.name"
+          resources:
+            {}
+          ports:
+            - name: nps-api
+              containerPort: 30300
+            - name: nps-health-api
+              containerPort: 30301
+          volumeMounts:
+            - name: jfrog-pipelines-folder
+              mountPath: /opt/jfrog/pipelines/var/etc
+            - name: jfrog-pipelines-logs
+              mountPath: /opt/jfrog/pipelines/var/log
+        - name: runservice
+          image: releases-docker.jfrog.io/jfrog/pipelines-run-service:1.40.5
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - NET_RAW
+          env:
+            - name: PIPELINES_NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: "metadata.name"
+          resources:
+            {}
+          volumeMounts:
+            - name: jfrog-pipelines-folder
+              mountPath: /opt/jfrog/pipelines/var/etc
+            - name: jfrog-pipelines-logs
+              mountPath: /opt/jfrog/pipelines/var/log
+        - name: logservice
+          image: releases-docker.jfrog.io/jfrog/pipelines-log-service:1.40.5
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - NET_RAW
+          env:
+            - name: PIPELINES_NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: "metadata.name"
+          resources:
+            {}
+          volumeMounts:
+            - name: jfrog-pipelines-folder
+              mountPath: /opt/jfrog/pipelines/var/etc
+            - name: jfrog-pipelines-logs
+              mountPath: /opt/jfrog/pipelines/var/log
+        - name: stepservice
+          image: releases-docker.jfrog.io/jfrog/pipelines-step-service:1.40.5
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - NET_RAW
+          env:
+            - name: PIPELINES_NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: "metadata.name"
+          resources:
+            {}
+          volumeMounts:
+            - name: jfrog-pipelines-folder
+              mountPath: /opt/jfrog/pipelines/var/etc
+            - name: jfrog-pipelines-logs
+              mountPath: /opt/jfrog/pipelines/var/log
+
+        - name: pipelinesync
+          image: releases-docker.jfrog.io/jfrog/pipelines-micro:1.40.5
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - NET_RAW
+          workingDir: /opt/jfrog/pipelines/app/micro/pipelineSync
+          env:
+            - name: COMPONENT
+              value: pipelinesync
+            - name: PIPELINES_NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: "metadata.name"
+          resources:
+            {}
+          volumeMounts:
+          - name: jfrog-pipelines-folder
+            mountPath: /opt/jfrog/pipelines/var/etc
+          - name: jfrog-pipelines-logs
+            mountPath: /opt/jfrog/pipelines/var/log
+        - name: runtrigger
+          image: releases-docker.jfrog.io/jfrog/pipelines-micro:1.40.5
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - NET_RAW
+          workingDir: /opt/jfrog/pipelines/app/micro/runTrigger
+          env:
+            - name: COMPONENT
+              value: runtrigger
+            - name: PIPELINES_NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: "metadata.name"
+          resources:
+            {}
+          volumeMounts:
+          - name: jfrog-pipelines-folder
+            mountPath: /opt/jfrog/pipelines/var/etc
+          - name: jfrog-pipelines-logs
+            mountPath: /opt/jfrog/pipelines/var/log
+        - name: steptrigger
+          image: releases-docker.jfrog.io/jfrog/pipelines-micro:1.40.5
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - NET_RAW
+          workingDir: /opt/jfrog/pipelines/app/micro/stepTrigger
+          env:
+            - name: COMPONENT
+              value: steptrigger
+            - name: PIPELINES_NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: "metadata.name"
+          resources:
+            {}
+          volumeMounts:
+          - name: jfrog-pipelines-folder
+            mountPath: /opt/jfrog/pipelines/var/etc
+          - name: jfrog-pipelines-logs
+            mountPath: /opt/jfrog/pipelines/var/log
+        - name: cron
+          image: releases-docker.jfrog.io/jfrog/pipelines-micro:1.40.5
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - NET_RAW
+          workingDir: /opt/jfrog/pipelines/app/micro/cron
+          env:
+            - name: COMPONENT
+              value: cron
+            - name: PIPELINES_NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: "metadata.name"
+          resources:
+            {}
+          volumeMounts:
+          - name: jfrog-pipelines-folder
+            mountPath: /opt/jfrog/pipelines/var/etc
+          - name: jfrog-pipelines-logs
+            mountPath: /opt/jfrog/pipelines/var/log
+        - name: nexec
+          image: releases-docker.jfrog.io/jfrog/pipelines-micro:1.40.5
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - NET_RAW
+          workingDir: /opt/jfrog/pipelines/app/micro/nexec
+          env:
+            - name: COMPONENT
+              value: nexec
+            - name: PIPELINES_NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: "metadata.name"
+          resources:
+            {}
+          volumeMounts:
+          - name: jfrog-pipelines-folder
+            mountPath: /opt/jfrog/pipelines/var/etc
+          - name: jfrog-pipelines-logs
+            mountPath: /opt/jfrog/pipelines/var/log
+        - name: hookhandler
+          image: releases-docker.jfrog.io/jfrog/pipelines-micro:1.40.5
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - NET_RAW
+          workingDir: /opt/jfrog/pipelines/app/micro/hookHandler
+          env:
+            - name: COMPONENT
+              value: hookhandler
+            - name: PIPELINES_NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: "metadata.name"
+          resources:
+            {}
+          volumeMounts:
+          - name: jfrog-pipelines-folder
+            mountPath: /opt/jfrog/pipelines/var/etc
+          - name: jfrog-pipelines-logs
+            mountPath: /opt/jfrog/pipelines/var/log
+        - name: marshaller
+          image: releases-docker.jfrog.io/jfrog/pipelines-micro:1.40.5
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - NET_RAW
+          workingDir: /opt/jfrog/pipelines/app/micro/marshaller
+          env:
+            - name: COMPONENT
+              value: marshaller
+            - name: PIPELINES_NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: "metadata.name"
+          resources:
+            {}
+          volumeMounts:
+          - name: jfrog-pipelines-folder
+            mountPath: /opt/jfrog/pipelines/var/etc
+          - name: jfrog-pipelines-logs
+            mountPath: /opt/jfrog/pipelines/var/log
+        - name: logup
+          image: releases-docker.jfrog.io/jfrog/pipelines-micro:1.40.5
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - NET_RAW
+          workingDir: /opt/jfrog/pipelines/app/micro/logup
+          env:
+            - name: COMPONENT
+              value: logup
+            - name: PIPELINES_NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: "metadata.name"
+          resources:
+            {}
+          volumeMounts:
+          - name: jfrog-pipelines-folder
+            mountPath: /opt/jfrog/pipelines/var/etc
+          - name: jfrog-pipelines-logs
+            mountPath: /opt/jfrog/pipelines/var/log
+        - name: extensionsync
+          image: releases-docker.jfrog.io/jfrog/pipelines-micro:1.40.5
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - NET_RAW
+          workingDir: /opt/jfrog/pipelines/app/micro/extensionSync
+          env:
+            - name: COMPONENT
+              value: extensionsync
+            - name: PIPELINES_NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: "metadata.name"
+          resources:
+            {}
+          volumeMounts:
+          - name: jfrog-pipelines-folder
+            mountPath: /opt/jfrog/pipelines/var/etc
+          - name: jfrog-pipelines-logs
+            mountPath: /opt/jfrog/pipelines/var/log
+        - name: reqsealer
+          image: releases-docker.jfrog.io/jfrog/pipelines-micro:1.40.5
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - NET_RAW
+          workingDir: /opt/jfrog/pipelines/app/micro/reqSealer
+          env:
+            - name: COMPONENT
+              value: reqsealer
+            - name: PIPELINES_NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: "metadata.name"
+          resources:
+            {}
+          volumeMounts:
+          - name: jfrog-pipelines-folder
+            mountPath: /opt/jfrog/pipelines/var/etc
+          - name: jfrog-pipelines-logs
+            mountPath: /opt/jfrog/pipelines/var/log
+        - name: templatesync
+          image: releases-docker.jfrog.io/jfrog/pipelines-micro:1.40.5
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - NET_RAW
+          workingDir: /opt/jfrog/pipelines/app/micro/templateSync
+          env:
+            - name: COMPONENT
+              value: templatesync
+            - name: PIPELINES_NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: "metadata.name"
+          resources:
+            {}
+          volumeMounts:
+            - name: jfrog-pipelines-folder
+              mountPath: /opt/jfrog/pipelines/var/etc
+            - name: jfrog-pipelines-logs
+              mountPath: /opt/jfrog/pipelines/var/log
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels:
+                    app: pipelines
+                    release: jfrog
+
+
+      volumes:
+
+      ########## External secrets ###########
+
+      # system yaml
+
+    #########  unifiedSecretInstallation ###########
+      - name: systemyaml
+        secret:
+          secretName: jfrog-pipelines-system-yaml
+
+      ############ Config map, Volumes and Custom Volumes ##############
+      
+      - name: postgres-setup-init-vol
+        configMap:
+          name: jfrog-setup-script
+      
+
+      - name: jfrog-pipelines-folder
+        emptyDir: {}
+      - name: jfrog-pipelines-logs
+        emptyDir: {}
+      - name: data-volume
+        emptyDir: {}
+      - name: pipelines-utility-scripts
+        configMap:
+          name: jfrog-pipelines-utility-scripts
+---
+# Source: jfrog-platform/charts/postgresql/templates/statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: jfrog-postgresql
+  labels:
+    app.kubernetes.io/name: postgresql
+    helm.sh/chart: postgresql-10.3.18
+    app.kubernetes.io/instance: jfrog
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: primary
+  annotations:
+  namespace: default
+spec:
+  serviceName: jfrog-postgresql-headless
+  replicas: 1
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: postgresql
+      app.kubernetes.io/instance: jfrog
+      role: primary
+  template:
+    metadata:
+      name: jfrog-postgresql
+      labels:
+        app.kubernetes.io/name: postgresql
+        helm.sh/chart: postgresql-10.3.18
+        app.kubernetes.io/instance: jfrog
+        app.kubernetes.io/managed-by: Helm
+        role: primary
+        app.kubernetes.io/component: primary
+    spec:      
+      affinity:
+        podAffinity:
+          
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: postgresql
+                    app.kubernetes.io/instance: jfrog
+                    app.kubernetes.io/component: primary
+                namespaces:
+                  - "default"
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+        nodeAffinity:
+          
+      securityContext:
+        fsGroup: 1001
+      containers:
+        - name: jfrog-postgresql
+          image: postgres-bitnammi-anz:13
+          imagePullPolicy: "IfNotPresent"
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+          securityContext:
+            runAsUser: 1001
+          env:
+            - name: BITNAMI_DEBUG
+              value: "false"
+            - name: POSTGRESQL_PORT_NUMBER
+              value: "5432"
+            - name: POSTGRESQL_VOLUME_DIR
+              value: "/bitnami/postgresql"
+            - name: PGDATA
+              value: "/bitnami/postgresql/data"
+            - name: POSTGRES_USERstatefulset
+              value: "postgres"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: jfrog-postgresql
+                  key: postgresql-password
+            - name: POSTGRESQL_ENABLE_LDAP
+              value: "no"
+            - name: POSTGRESQL_ENABLE_TLS
+              value: "no"
+            - name: POSTGRESQL_LOG_HOSTNAME
+              value: "false"
+            - name: POSTGRESQL_LOG_CONNECTIONS
+              value: "false"
+            - name: POSTGRESQL_LOG_DISCONNECTIONS
+              value: "false"
+            - name: POSTGRESQL_PGAUDIT_LOG_CATALOG
+              value: "off"
+            - name: POSTGRESQL_CLIENT_MIN_MESSAGES
+              value: "error"
+            - name: POSTGRESQL_SHARED_PRELOAD_LIBRARIES
+              value: "pgaudit"
+          ports:
+            - name: tcp-postgresql
+              containerPort: 5432
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - exec pg_isready -U "postgres" -h 127.0.0.1 -p 5432
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 6
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - -e
+                - |
+                  exec pg_isready -U "postgres" -h 127.0.0.1 -p 5432
+                  [ -f /opt/bitnami/postgresql/tmp/.initialized ] || [ -f /bitnami/postgresql/.initialized ]
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 6
+          volumeMounts:
+            - name: postgresql-extended-config
+              mountPath: /bitnami/postgresql/conf/conf.d/
+            - name: dshm
+              mountPath: /dev/shm
+            - name: data
+              mountPath: /bitnami/postgresql
+              subPath: 
+      volumes:
+        - name: postgresql-extended-config
+          configMap:
+            name: jfrog-postgresql-extended-configuration
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 1Gi
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - "ReadWriteOnce"
+        resources:
+          requests:
+            storage: "500Gi"
+---
+# Source: jfrog-platform/charts/rabbitmq/templates/statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: jfrog-rabbitmq
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: rabbitmq
+    helm.sh/chart: rabbitmq-11.9.3
+    app.kubernetes.io/instance: jfrog
+    app.kubernetes.io/managed-by: Helm
+spec:
+  serviceName: jfrog-rabbitmq-headless
+  podManagementPolicy: OrderedReady
+  replicas: 1
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: rabbitmq
+      app.kubernetes.io/instance: jfrog
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: rabbitmq
+        helm.sh/chart: rabbitmq-11.9.3
+        app.kubernetes.io/instance: jfrog
+        app.kubernetes.io/managed-by: Helm
+      annotations:
+        checksum/config: ac10bd2212625c8aebf92acbb8a7d10bdc0cc7cbfc4f32bb1ec80b92b3bf980a
+        checksum/secret: 826f15a21328833279185dbeda7450349b2f05071730a7ff93c3631a4ddc3864
+    spec:
+      
+      serviceAccountName: jfrog-rabbitmq
+      affinity:
+        podAffinity:
+          
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: rabbitmq
+                    app.kubernetes.io/instance: jfrog
+                namespaces:
+                  - "default"
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+        nodeAffinity:
+          
+      securityContext:
+        fsGroup: 1001
+      terminationGracePeriodSeconds: 120
+      initContainers:
+      containers:
+        - name: rabbitmq
+          image: releases-docker.jfrog.io/bitnami/rabbitmq:3.11.10-debian-11-r5
+          imagePullPolicy: "IfNotPresent"
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1001
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - /bin/bash
+                  - -ec
+                  - |
+                    if [[ -f /opt/bitnami/scripts/rabbitmq/nodeshutdown.sh ]]; then
+                        /opt/bitnami/scripts/rabbitmq/nodeshutdown.sh -t "120" -d "false"
+                    else
+                        rabbitmqctl stop_app
+                    fi
+          env:
+            - name: BITNAMI_DEBUG
+              value: "false"
+            - name: MY_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: MY_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: MY_POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: K8S_SERVICE_NAME
+              value: jfrog-rabbitmq-headless
+            - name: K8S_ADDRESS_TYPE
+              value: hostname
+            - name: RABBITMQ_FEATURE_FLAGS
+              value: drop_unroutable_metric,empty_basic_get_metric,implicit_default_bindings,maintenance_mode_status,quorum_queue,stream_queue,user_limits,virtual_host_metadata
+            - name: RABBITMQ_FORCE_BOOT
+              value: "no"
+            - name: RABBITMQ_NODE_NAME
+              value: "rabbit@$(MY_POD_NAME).$(K8S_SERVICE_NAME).$(MY_POD_NAMESPACE).svc.cluster.local"
+            - name: K8S_HOSTNAME_SUFFIX
+              value: ".$(K8S_SERVICE_NAME).$(MY_POD_NAMESPACE).svc.cluster.local"
+            - name: RABBITMQ_MNESIA_DIR
+              value: "/bitnami/rabbitmq/mnesia/$(RABBITMQ_NODE_NAME)"
+            - name: RABBITMQ_LDAP_ENABLE
+              value: "no"
+            - name: RABBITMQ_LOGS
+              value: "-"
+            - name: RABBITMQ_ULIMIT_NOFILES
+              value: "65536"
+            - name: RABBITMQ_USE_LONGNAME
+              value: "true"
+            - name: RABBITMQ_ERL_COOKIE
+              valueFrom:
+                secretKeyRef:
+                  name: jfrog-rabbitmq
+                  key: rabbitmq-erlang-cookie
+            - name: RABBITMQ_LOAD_DEFINITIONS
+              value: "yes"
+            - name: RABBITMQ_DEFINITIONS_FILE
+              value: "/app/load_definition.json"
+            - name: RABBITMQ_SECURE_PASSWORD
+              value: "yes"
+            - name: RABBITMQ_USERNAME
+              value: "admin"
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: jfrog-rabbitmq
+                  key: rabbitmq-password
+            - name: RABBITMQ_PLUGINS
+              value: "rabbitmq_management, rabbitmq_peer_discovery_k8s, rabbitmq_auth_backend_ldap"
+            - name: RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS
+              value: +S 2:2 +sbwt none +sbwtdcpu none +sbwtdio none
+          envFrom:
+          ports:
+            - name: amqp
+              containerPort: 5672
+            - name: dist
+              containerPort: 25672
+            - name: stats
+              containerPort: 15672
+            - name: epmd
+              containerPort: 4369
+          livenessProbe:
+            failureThreshold: 6
+            initialDelaySeconds: 120
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 20
+            exec:
+              command:
+                - /bin/bash
+                - -ec
+                - rabbitmq-diagnostics -q ping
+          readinessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 20
+            exec:
+              command:
+                - /bin/bash
+                - -ec
+                - rabbitmq-diagnostics -q check_running && rabbitmq-diagnostics -q check_local_alarms
+          resources:
+            limits: {}
+            requests: {}
+          volumeMounts:
+            - name: configuration
+              mountPath: /bitnami/rabbitmq/conf
+            - name: data
+              mountPath: /bitnami/rabbitmq/mnesia
+            - name: load-definition-volume
+              mountPath: /app
+              readOnly: true
+      volumes:
+        - name: configuration
+          projected:
+            sources:
+              - secret:
+                  name: jfrog-rabbitmq-config
+        - name: load-definition-volume
+          secret:
+            secretName: "jfrog-load-definition"
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        labels:
+          app.kubernetes.io/name: rabbitmq
+          app.kubernetes.io/instance: jfrog
+      spec:
+        accessModes:
+            - "ReadWriteOnce"
+        resources:
+          requests:
+            storage: "50Gi"
+---
+# Source: jfrog-platform/charts/redis/templates/redis-master-statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: jfrog-redis-master
+  namespace: "default"
+  labels:
+    app: redis
+    chart: redis-12.10.1
+    release: jfrog
+    heritage: Helm
+spec:
+  selector:
+    matchLabels:
+      app: redis
+      release: jfrog
+      role: master
+  serviceName: jfrog-redis-headless
+  template:
+    metadata:
+      labels:
+        app: redis
+        chart: redis-12.10.1
+        release: jfrog
+        role: master
+      annotations:
+        checksum/health: fd1354729675554de6e6d78c94eab56021f8c23ce3a4265b217d9b6266420317
+        checksum/configmap: c344452c78b51125b5a1e85f19248d4e707732cc6a40c1244a100daf47388c32
+        checksum/secret: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    spec:
+      
+      securityContext:
+        fsGroup: 1001
+      serviceAccountName: default
+      containers:
+        - name: redis
+          image: releases-docker.jfrog.io/bitnami/redis:7.0.9-debian-11-r6
+          imagePullPolicy: "IfNotPresent"
+          securityContext:
+            runAsUser: 1001
+          command:
+            - /bin/bash
+            - -c
+            - /opt/bitnami/scripts/start-scripts/start-master.sh
+          env:
+            - name: REDIS_REPLICATION_MODE
+              value: master
+            - name: ALLOW_EMPTY_PASSWORD
+              value: "yes"
+            - name: REDIS_TLS_ENABLED
+              value: "no"
+            - name: REDIS_PORT
+              value: "6379"
+          ports:
+            - name: redis
+              containerPort: 6379
+          livenessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            # One second longer than command timeout should prevent generation of zombie processes.
+            timeoutSeconds: 6
+            successThreshold: 1
+            failureThreshold: 5
+            exec:
+              command:
+                - sh
+                - -c
+                - /health/ping_liveness_local.sh 5
+          readinessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+            successThreshold: 1
+            failureThreshold: 5
+            exec:
+              command:
+                - sh
+                - -c
+                - /health/ping_readiness_local.sh 1
+          resources:
+            null
+          volumeMounts:
+            - name: start-scripts
+              mountPath: /opt/bitnami/scripts/start-scripts
+            - name: health
+              mountPath: /health
+            - name: redis-data
+              mountPath: /data
+              subPath: 
+            - name: config
+              mountPath: /opt/bitnami/redis/mounted-etc
+            - name: redis-tmp-conf
+              mountPath: /opt/bitnami/redis/etc/
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: start-scripts
+          configMap:
+            name: jfrog-redis-scripts
+            defaultMode: 0755
+        - name: health
+          configMap:
+            name: jfrog-redis-health
+            defaultMode: 0755
+        - name: config
+          configMap:
+            name: jfrog-redis
+        - name: redis-tmp-conf
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+  volumeClaimTemplates:
+    - metadata:
+        name: redis-data
+        labels:
+          app: redis
+          release: jfrog
+          heritage: Helm
+          component: master
+      spec:
+        accessModes:
+          - "ReadWriteOnce"
+        resources:
+          requests:
+            storage: "8Gi"
+        
+        selector:
+  updateStrategy:
+    type: RollingUpdate
+---
+# Source: jfrog-platform/charts/xray/templates/xray-statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: jfrog-xray
+  labels:
+    app: xray
+    chart: xray-103.76.7
+    heritage: Helm
+    release: jfrog
+    component: xray
+spec:
+  serviceName: "jfrog-xray"
+  replicas: 1
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: xray
+      release: jfrog
+      component: xray
+  template:
+    metadata:
+      labels:
+        app: xray
+        release: jfrog
+        component: xray
+      annotations:
+        checksum/database-secrets: 84853beeaaf0efa5cdfdd5491314522122a3992ad2cf8b27cf680cd21b50faa8
+        checksum/systemyaml: 3ae5472ef0c57a4528e9315c876f6a2f850ee701ff1575926ba158eb58615c8f
+    spec:
+      serviceAccountName: default
+      securityContext:
+        runAsUser: 1035
+        fsGroup: 1035
+      initContainers:
+      
+      - name: postgres-setup-init
+        image: releases-docker.jfrog.io/postgres:13.10-alpine
+        imagePullPolicy: Always
+        command:
+          - '/bin/bash'
+          - '-c'
+          - >
+            until nc -z -w 5 jfrog-artifactory 8082; do echo "Waiting for artifactory to start"; sleep 10; done;
+            echo "Running init db scripts";
+            bash /scripts/setupPostgres.sh
+        env:
+          - name: PGUSERNAME
+            value: postgres
+          - name: DB_HOST
+            value: jfrog-postgresql
+          - name: DB_PORT
+            value: "5432"
+          - name: DB_SSL_MODE
+            value: "disable"
+          - name: DB_NAME
+            value: xray
+          - name: DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: jfrog-xray-database-creds
+                key: db-user
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: jfrog-xray-database-creds
+                key: db-password
+          - name: PGPASSWORD
+            value: postgres
+          - name: CHART_NAME
+            value: xray
+        volumeMounts:
+          - name: postgres-setup-init-vol
+            mountPath: "/scripts"
+      
+      - name: 'copy-system-yaml'
+        image: 'releases-docker.jfrog.io/ubi9/ubi-minimal:9.1.0.1793'
+        securityContext:
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - NET_RAW
+        resources:
+          limits:
+            cpu: "1"
+            memory: 1Gi
+          requests:
+            cpu: 10m
+            memory: 50Mi
+        command:
+        - 'bash'
+        - '-c'
+        - >
+          if [[ -e "/var/opt/jfrog/xray/etc/filebeat.yaml" ]]; then chmod 644 /var/opt/jfrog/xray/etc/filebeat.yaml; fi;
+          echo "Copy system.yaml to /var/opt/jfrog/xray/etc";
+          mkdir -p /var/opt/jfrog/xray/etc;
+          cp -fv /tmp/etc/system.yaml /var/opt/jfrog/xray/etc/system.yaml;
+          echo "Remove /var/opt/jfrog/xray/lost+found folder if exists";
+          rm -rfv /var/opt/jfrog/xray/lost+found;
+          echo "Copy joinKey to /var/opt/jfrog/xray/etc/security";
+          mkdir -p /var/opt/jfrog/xray/etc/security;
+          echo ${XRAY_JOIN_KEY} > /var/opt/jfrog/xray/etc/security/join.key;
+          echo "Copy masterKey to /var/opt/jfrog/xray/etc/security";
+          mkdir -p /var/opt/jfrog/xray/etc/security;
+          echo ${XRAY_MASTER_KEY} > /var/opt/jfrog/xray/etc/security/master.key;
+        env:
+        - name: XRAY_JOIN_KEY
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-xray
+              key: join-key
+        - name: XRAY_MASTER_KEY
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-xray
+              key: master-key
+        volumeMounts:
+        - name: data-volume
+          mountPath: "/var/opt/jfrog/xray"
+        - name: systemyaml
+          mountPath: "/tmp/etc/system.yaml"
+          subPath: system.yaml
+      containers:
+      - name: router
+        image: releases-docker.jfrog.io/jfrog/router:7.70.1
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1035
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - NET_RAW
+        command:
+          - '/bin/sh'
+          - '-c'
+          - >
+            exec /opt/jfrog/router/app/bin/entrypoint-router.sh;
+        env:
+        - name: JF_ROUTER_TOPOLOGY_LOCAL_REQUIREDSERVICETYPES
+          value: jfxr,jfxana,jfxidx,jfxpst,jfob
+        ports:
+          - name: http-router
+            containerPort: 8082
+        volumeMounts:
+        - name: data-volume
+          mountPath: "/var/opt/jfrog/router"
+        resources:
+          {}
+        startupProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - curl -s -k --fail --max-time 5 http://localhost:8082/router/api/v1/system/readiness
+          initialDelaySeconds: 30
+          failureThreshold: 30
+          periodSeconds: 5
+          timeoutSeconds: 5
+          
+        livenessProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - curl -s -k --fail --max-time 5 http://localhost:8082/router/api/v1/system/liveness
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 5
+          successThreshold: 1
+          
+        readinessProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - curl -s -k --fail --max-time 5 http://localhost:8082/router/api/v1/system/readiness
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 5
+          successThreshold: 1
+          
+      - name: observability
+        image: releases-docker.jfrog.io/jfrog/observability:1.13.5
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - NET_RAW
+        command:
+          - '/bin/sh'
+          - '-c'
+          - >
+            exec /opt/jfrog/observability/app/bin/entrypoint-observability.sh;
+        volumeMounts:
+        - name: data-volume
+          mountPath: "/var/opt/jfrog/observability"
+        resources:
+          {}
+        startupProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - curl --fail --max-time 5 http://localhost:8036/api/v1/system/readiness
+          initialDelaySeconds: 30
+          failureThreshold: 90
+          periodSeconds: 5
+          timeoutSeconds: 5
+          
+        livenessProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - curl --fail --max-time 5 http://localhost:8036/api/v1/system/liveness
+          initialDelaySeconds: 0
+          failureThreshold: 5
+          timeoutSeconds: 5
+          periodSeconds: 10
+          successThreshold: 1
+          
+      - name: xray-server
+        image: releases-docker.jfrog.io/jfrog/xray-server:3.76.7
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1035
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - NET_RAW
+        command:
+          - '/bin/bash'
+          - '-c'
+          - >
+            exec /opt/jfrog/xray/app/bin/wrapper.sh;
+        env:
+        - name: JF_SHARED_DATABASE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-xray-database-creds
+              key: db-user
+      
+        - name: JF_SHARED_DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-xray-database-creds
+              key: db-password
+        - name: JF_SHARED_DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-xray-database-creds
+              key: db-url
+        - name: XRAY_K8S_ENV
+          value: "true"
+        - name: EXECUTION_JOB_AES_KEY
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-xray
+              key: execution-service-aes-key
+        - name: XRAY_CHART_FULL_NAME
+          value: 'jfrog-xray'
+        - name: XRAY_CHART_NAME
+          value: 'xray'
+        - name: XRAY_CHART_UNIFIED_SECRET_INSTALLATION
+          value: "false"
+        - name: XRAY_CHART_SYSTEM_YAML_OVERRIDE_EXISTING_SECRET
+          value: ""
+        - name: XRAY_CHART_SYSTEM_YAML_OVERRIDE_DATA_KEY
+          value: ""
+        - name: "JF_SHARED_RABBITMQ_VHOST"
+          value: "xray"
+        
+        ports:
+        - containerPort: 8000
+          name: http-server
+        volumeMounts:
+        - name: data-volume
+          mountPath: "/var/opt/jfrog/xray"
+        resources:
+          {}
+        startupProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - curl -s -k --fail --max-time 5 http://localhost:8000/api/v1/system/readiness
+          initialDelaySeconds: 30
+          failureThreshold: 30
+          periodSeconds: 5
+          timeoutSeconds: 5
+          
+        livenessProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - curl -s -k --fail --max-time 5 http://localhost:8000/api/v1/system/liveness
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+          successThreshold: 1
+          
+      - name: xray-analysis
+        image: releases-docker.jfrog.io/jfrog/xray-analysis:3.76.7
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1035
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - NET_RAW
+        command:
+          - '/bin/bash'
+          - '-c'
+          - >
+            exec /opt/jfrog/xray/app/bin/wrapper.sh;
+        env:
+        - name: JF_SHARED_DATABASE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-xray-database-creds
+              key: db-user
+      
+        - name: JF_SHARED_DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-xray-database-creds
+              key: db-password
+        - name: JF_SHARED_DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-xray-database-creds
+              key: db-url
+        - name: XRAY_HA_NODE_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: XRAY_K8S_ENV
+          value: "true"
+        - name: EXECUTION_JOB_AES_KEY
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-xray
+              key: execution-service-aes-key
+        - name: XRAY_CHART_FULL_NAME
+          value: 'jfrog-xray'
+        - name: XRAY_CHART_NAME
+          value: 'xray'
+        - name: XRAY_CHART_UNIFIED_SECRET_INSTALLATION
+          value: "false"
+        - name: XRAY_CHART_SYSTEM_YAML_OVERRIDE_EXISTING_SECRET
+          value: ""
+        - name: XRAY_CHART_SYSTEM_YAML_OVERRIDE_DATA_KEY
+          value: ""
+        - name: "JF_SHARED_RABBITMQ_VHOST"
+          value: "xray"
+        
+        ports:
+        - containerPort: 7000
+          name: http-analysis
+        volumeMounts:
+        - name: data-volume
+          mountPath: "/var/opt/jfrog/xray"
+        resources:
+          {}
+        startupProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - curl -s -k --fail --max-time 5 http://localhost:7000/api/v1/system/readiness
+          initialDelaySeconds: 30
+          failureThreshold: 30
+          periodSeconds: 5
+          timeoutSeconds: 1
+          
+        livenessProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - curl -s -k --fail --max-time 5 http://localhost:7000/api/v1/system/liveness
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+          successThreshold: 1
+          
+      - name: xray-indexer
+        image: releases-docker.jfrog.io/jfrog/xray-indexer:3.76.7
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1035
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - NET_RAW
+        command:
+          - '/bin/bash'
+          - '-c'
+          - >
+            exec /opt/jfrog/xray/app/bin/wrapper.sh;
+        env:
+        - name: JF_SHARED_DATABASE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-xray-database-creds
+              key: db-user
+      
+        - name: JF_SHARED_DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-xray-database-creds
+              key: db-password
+        - name: JF_SHARED_DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-xray-database-creds
+              key: db-url
+        - name: XRAY_HA_NODE_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: XRAY_K8S_ENV
+          value: "true"
+        - name: XRAY_CHART_FULL_NAME
+          value: 'jfrog-xray'
+        - name: XRAY_CHART_NAME
+          value: 'xray'
+        - name: XRAY_CHART_UNIFIED_SECRET_INSTALLATION
+          value: "false"
+        - name: XRAY_CHART_SYSTEM_YAML_OVERRIDE_EXISTING_SECRET
+          value: ""
+        - name: XRAY_CHART_SYSTEM_YAML_OVERRIDE_DATA_KEY
+          value: ""
+        - name: "JF_SHARED_RABBITMQ_VHOST"
+          value: "xray"
+        
+        ports:
+        - containerPort: 7002
+          name: http-indexer
+        volumeMounts:
+        - name: data-volume
+          mountPath: "/var/opt/jfrog/xray"
+        resources:
+          {}
+        startupProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - curl -s -k --fail --max-time 5 http://localhost:7002/api/v1/system/readiness
+          initialDelaySeconds: 30
+          failureThreshold: 30
+          periodSeconds: 5
+          timeoutSeconds: 5
+          
+        livenessProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - curl -s -k --fail --max-time 5 http://localhost:7002/api/v1/system/liveness
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+          successThreshold: 1
+          
+      - name: xray-persist
+        image: releases-docker.jfrog.io/jfrog/xray-persist:3.76.7
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1035
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - NET_RAW
+        command:
+          - '/bin/bash'
+          - '-c'
+          - >
+            exec /opt/jfrog/xray/app/bin/wrapper.sh;
+        env:
+        - name: JF_SHARED_DATABASE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-xray-database-creds
+              key: db-user
+      
+        - name: JF_SHARED_DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-xray-database-creds
+              key: db-password
+        - name: JF_SHARED_DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-xray-database-creds
+              key: db-url
+        - name: XRAY_K8S_ENV
+          value: "true"
+        - name: XRAY_CHART_FULL_NAME
+          value: 'jfrog-xray'
+        - name: XRAY_CHART_NAME
+          value: 'xray'
+        - name: XRAY_CHART_UNIFIED_SECRET_INSTALLATION
+          value: "false"
+        - name: XRAY_CHART_SYSTEM_YAML_OVERRIDE_EXISTING_SECRET
+          value: ""
+        - name: XRAY_CHART_SYSTEM_YAML_OVERRIDE_DATA_KEY
+          value: ""
+        - name: "JF_SHARED_RABBITMQ_VHOST"
+          value: "xray"
+        
+        ports:
+        - containerPort: 7003
+          name: http-persist
+        volumeMounts:
+        - name: data-volume
+          mountPath: "/var/opt/jfrog/xray"
+        resources:
+          {}
+        startupProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - curl -s -k --fail --max-time 5 http://localhost:7003/api/v1/system/readiness
+          initialDelaySeconds: 30
+          failureThreshold: 30
+          periodSeconds: 5
+          timeoutSeconds: 5
+          
+        livenessProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - curl -s -k --fail --max-time 5 http://localhost:7003/api/v1/system/liveness
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+          successThreshold: 1
+          
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels:
+                    app: xray
+                    release: jfrog
+      volumes:
+      ########## External secrets ###########
+      ############ Config map, Volumes and Custom Volumes ##############
+      ######### Non unifiedSecretInstallation ###########
+      - name: systemyaml
+        secret:
+          secretName: jfrog-xray-system-yaml
+      
+      - name: postgres-setup-init-vol
+        configMap:
+          name: jfrog-setup-script
+      
+  volumeClaimTemplates:
+  - metadata:
+      name: data-volume
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 200Gi
+---
+# Source: jfrog-platform/charts/xray/templates/migration-hook.yaml
+---
+---
+# Source: jfrog-platform/templates/migration-hook.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+    labels:
+        app: jfrog-platform
+        chart: jfrog-platform-10.13.3
+        release: "jfrog"
+        heritage: "Helm"
+    name: jfrog-rabbitmq-migration
+    annotations:
+        helm.sh/hook: "pre-upgrade"
+        helm.sh/hook-weight: "-10"
+automountServiceAccountToken: true
+---
+# Source: jfrog-platform/templates/migration-hook.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+    labels:
+        app: jfrog-platform
+        chart: jfrog-platform-10.13.3
+        release: "jfrog"
+        heritage: "Helm"
+    name: jfrog-rabbitmq-migration
+    annotations:
+        helm.sh/hook: "pre-upgrade"
+        helm.sh/hook-weight: "-10"
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods/exec
+  - pods
+  verbs:
+  - create
+  - get
+---
+# Source: jfrog-platform/templates/migration-hook.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+    labels:
+        app: jfrog-platform
+        chart: jfrog-platform-10.13.3
+        release: "jfrog"
+        heritage: "Helm"
+    name: jfrog-rabbitmq-migration
+    annotations:
+        helm.sh/hook: "pre-upgrade"
+        helm.sh/hook-weight: "-10"
+subjects:
+    - kind: ServiceAccount
+      name: jfrog-rabbitmq-migration
+roleRef:
+    kind: Role
+    apiGroup: rbac.authorization.k8s.io
+    name: jfrog-rabbitmq-migration
+---
+# Source: jfrog-platform/charts/pipelines/charts/vault/templates/tests/server-test.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "jfrog-server-test"
+  namespace: default
+  annotations:
+    "helm.sh/hook": test
+spec:
+  
+  containers:
+    - name: jfrog-server-test
+      image: releases-docker.jfrog.io/hashicorp/vault:1.8.6
+      imagePullPolicy: IfNotPresent
+      env:
+        - name: VAULT_ADDR
+          value: http://jfrog-vault.default.svc:8200
+      command:
+        - /bin/sh
+        - -c
+        - |
+          echo "Checking for sealed info in 'vault status' output"
+          ATTEMPTS=10
+          n=0
+          until [ "$n" -ge $ATTEMPTS ]
+          do
+            echo "Attempt" $n...
+            vault status -format yaml | grep -E '^sealed: (true|false)' && break
+            n=$((n+1))
+            sleep 5
+          done
+          if [ $n -ge $ATTEMPTS ]; then
+            echo "timed out looking for sealed info in 'vault status' output"
+            exit 1
+          fi
+
+          exit 0
+
+  restartPolicy: Never
+---
+# Source: jfrog-platform/templates/migration-hook.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: jfrog-platform
+    chart: jfrog-platform-10.13.3
+    heritage: Helm
+    release: jfrog
+  name: jfrog-jfrog-platform-pre-upgrade-hook
+  annotations:
+    "helm.sh/hook": "pre-upgrade"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  serviceAccountName: jfrog-rabbitmq-migration
+  securityContext:
+    fsGroup: 1001
+  containers:
+    - name: pre-upgrade-container
+      image: releases-docker.jfrog.io/bitnami/kubectl:1.24.12
+      imagePullPolicy: IfNotPresent
+      command: ['sh', '-c', 'kubectl exec -it jfrog-rabbitmq-0 -- rabbitmqctl enable_feature_flag all ; if [ "$?" -ne 0 ]; then echo "Failed to perform the migration. Please make sure to enable the feature flag in rabbitmq manually [rabbitmqctl enable_feature_flag all] "; exit 1; fi' ]
+  restartPolicy: Never
+  terminationGracePeriodSeconds: 0

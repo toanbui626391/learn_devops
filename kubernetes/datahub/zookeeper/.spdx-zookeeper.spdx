@@ -1,0 +1,883 @@
+{
+    "SPDXID": "SPDXRef-zookeeper",
+    "spdxVersion": "SPDX-2.3",
+    "creationInfo": {
+        "created": "2023-03-30T23:58:44.316Z",
+        "creators": [
+            "Organization: VMware, Inc."
+        ]
+    },
+    "name": "SPDX document for Apache ZooKeeper 3.8.1",
+    "dataLicense": "CC0-1.0",
+    "documentDescribes": [
+        "SPDXRef-zookeeper"
+    ],
+    "documentNamespace": "zookeeper-3.8.1",
+    "packages": [
+        {
+            "SPDXID": "SPDXRef-zookeeper",
+            "name": "Apache ZooKeeper",
+            "versionInfo": "3.8.1",
+            "downloadLocation": "https://dlcdn.apache.org/zookeeper/zookeeper-3.8.1/apache-zookeeper-3.8.1.tar.gz",
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "filesAnalyzed": false,
+            "externalRefs": [
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceType": "cpe23Type",
+                    "referenceLocator": "cpe:2.3:*:apache:zookeeper:3.8.1:*:*:*:*:*:*:*"
+                }
+            ]
+        },
+        {
+            "SPDXID": "SPDXRef-Package-1bf22638e5873ceb",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.eclipse.jetty/jetty-security@9.4.49.v20220914",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-c4a11b0a9516efc"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "org.eclipse.jetty:jetty-security",
+            "versionInfo": "9.4.49.v20220914",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-22679624efd055dc",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.jctools/jctools-core@3.1.0",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-749e2a492faff0b2"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "org.jctools:jctools-core",
+            "versionInfo": "3.1.0",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-2ae620dd9c2a10d1",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/ch.qos.logback/logback-classic@1.2.10",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-acd03d238cba74e3"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "ch.qos.logback:logback-classic",
+            "versionInfo": "1.2.10",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-2f87197df520dfcf",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/io.dropwizard.metrics/metrics-core@4.1.12.1",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-649a6c8629ee6d99"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "io.dropwizard.metrics:metrics-core",
+            "versionInfo": "4.1.12.1",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-406fff1e856ef4d7",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.eclipse.jetty/jetty-util@9.4.49.v20220914",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-1700ec47ee180782"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "org.eclipse.jetty:jetty-util",
+            "versionInfo": "9.4.49.v20220914",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-47033d75ca1d1f4",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.apache.zookeeper/zookeeper@3.8.1",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-3a1cf2770ec63381"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "org.apache.zookeeper:zookeeper",
+            "versionInfo": "3.8.1",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-4cb50f074a79df4e",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/io.prometheus/simpleclient@0.9.0",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-439b33efadb75a29"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "io.prometheus:simpleclient",
+            "versionInfo": "0.9.0",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-4d3f64f0516cf2ba",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.13.4.2",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-9496cea44b250336"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "com.fasterxml.jackson.core:jackson-databind",
+            "versionInfo": "2.13.4.2",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-5a3dd57099ce44f4",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.eclipse.jetty/jetty-http@9.4.49.v20220914",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-8f2e14f7ac7c78a6"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "org.eclipse.jetty:jetty-http",
+            "versionInfo": "9.4.49.v20220914",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-5aac9a8b28f3b049",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/io.prometheus/simpleclient_servlet@0.9.0",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-d4c871d88a75105f"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "io.prometheus:simpleclient_servlet",
+            "versionInfo": "0.9.0",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-5c4020c367f79b2f",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.xerial.snappy/snappy-java@1.1.7.7",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-bc7c6131e6133de5"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "org.xerial.snappy:snappy-java",
+            "versionInfo": "1.1.7.7",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-61b4fc39ddd70a96",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/ch.qos.logback/logback-core@1.2.10",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-b41042530af6bb8a"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "ch.qos.logback:logback-core",
+            "versionInfo": "1.2.10",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-6565888c7ac62e74",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.eclipse.jetty/jetty-servlet@9.4.49.v20220914",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-28cff817a3a78b03"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "org.eclipse.jetty:jetty-servlet",
+            "versionInfo": "9.4.49.v20220914",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-6661beac600d29fd",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/io.netty/netty-codec@4.1.86.Final",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-459089e09dbe0f31"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "io.netty:netty-codec",
+            "versionInfo": "4.1.86.Final",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-6672b188c6302ed2",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.eclipse.jetty/jetty-server@9.4.49.v20220914",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-54b1fa244a6425f5"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "org.eclipse.jetty:jetty-server",
+            "versionInfo": "9.4.49.v20220914",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-72d9eeedd2555e81",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/io.netty/netty-common@4.1.86.Final",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-749e2a492faff0b2"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "io.netty:netty-common",
+            "versionInfo": "4.1.86.Final",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-740431e43ca0676",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/commons-cli/commons-cli@1.5.0",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-3601642a5ca119ae"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "commons-cli:commons-cli",
+            "versionInfo": "1.5.0",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-7c212bfd0df624af",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/io.netty/netty-transport-native-epoll@4.1.86.Final",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-e805739fdf77fc63"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "io.netty:netty-transport-native-epoll",
+            "versionInfo": "4.1.86.Final",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-7c5659572a73e053",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/io.netty/netty-transport-native-unix-common@4.1.86.Final",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-172297574c8d1795"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "io.netty:netty-transport-native-unix-common",
+            "versionInfo": "4.1.86.Final",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-8ad0ae89616da43b",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/com.fasterxml.jackson.core/jackson-annotations@2.13.4",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-f6f3152992570601"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "com.fasterxml.jackson.core:jackson-annotations",
+            "versionInfo": "2.13.4",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-9a78f772772e0985",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/io.netty/netty-resolver@4.1.86.Final",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-858623e9c161e1c9"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "io.netty:netty-resolver",
+            "versionInfo": "4.1.86.Final",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-a49ebb1de85a4b6d",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.apache.zookeeper/zookeeper-jute@3.8.1",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-135a9bb5a1940078"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "org.apache.zookeeper:zookeeper-jute",
+            "versionInfo": "3.8.1",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-aa1a890b7315aae0",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.eclipse.jetty/jetty-util-ajax@9.4.49.v20220914",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-2f74396d283b78f7"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "org.eclipse.jetty:jetty-util-ajax",
+            "versionInfo": "9.4.49.v20220914",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-aaa6a45d475e4f8f",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/io.prometheus/simpleclient_common@0.9.0",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-953a8f7545a0861d"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "io.prometheus:simpleclient_common",
+            "versionInfo": "0.9.0",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-ac8cbcd7610fa8e0",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/commons-io/commons-io@2.11.0",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-a4cb993af166f7c2"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "commons-io:commons-io",
+            "versionInfo": "2.11.0",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-af9b38899c3af276",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.eclipse.jetty/jetty-io@9.4.49.v20220914",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-bfe57dee89c29422"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "org.eclipse.jetty:jetty-io",
+            "versionInfo": "9.4.49.v20220914",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-b4a0b15f58285874",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/jline/jline@2.14.6",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-c33c163ea31afa06"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "jline:jline",
+            "versionInfo": "2.14.6",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-c417f72dd7f62922",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.apache.yetus/audience-annotations@0.12.0",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-3dc74cc3e303ecd7"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "org.apache.yetus:audience-annotations",
+            "versionInfo": "0.12.0",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-cd4fe3f07c4ab87c",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/io.netty/netty-transport@4.1.86.Final",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-4bd12a76a3835a3e"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "io.netty:netty-transport",
+            "versionInfo": "4.1.86.Final",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-d839592038e73eff",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/io.netty/netty-transport-classes-epoll@4.1.86.Final",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-661a52e81b6c5790"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "io.netty:netty-transport-classes-epoll",
+            "versionInfo": "4.1.86.Final",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-dc4c396c75ab6cc6",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.slf4j/slf4j-api@1.7.30",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-ce6fd8a9832fd7a"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "org.slf4j:slf4j-api",
+            "versionInfo": "1.7.30",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-e11964fb999a101e",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.apache.zookeeper/zookeeper-prometheus-metrics@3.8.1",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-c3d1f495c7d6d1da"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "org.apache.zookeeper:zookeeper-prometheus-metrics",
+            "versionInfo": "3.8.1",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-e6d74859c5019614",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/io.netty/netty-handler@4.1.86.Final",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-aedfa33a1fead9f"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "io.netty:netty-handler",
+            "versionInfo": "4.1.86.Final",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-eac14837e94cb3da",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/javax.servlet/javax.servlet-api@3.1.0",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-aff124d19d1c1e7d"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "javax.servlet:javax.servlet-api",
+            "versionInfo": "3.1.0",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-f21d932b821f454c",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/com.fasterxml.jackson.core/jackson-core@2.13.4",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-229537d82c8c10e"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "com.fasterxml.jackson.core:jackson-core",
+            "versionInfo": "2.13.4",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-f293ca40aa5f42b9",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/io.prometheus/simpleclient_hotspot@0.9.0",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-da16a6ae4c07f825"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "io.prometheus:simpleclient_hotspot",
+            "versionInfo": "0.9.0",
+            "downloadLocation": "NOASSERTION"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-faaae85debfd0ad1",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/io.netty/netty-buffer@4.1.86.Final",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "hasFiles": [
+                "SPDXRef-File-689e3788d1b4df49"
+            ],
+            "licenseConcluded": "NONE",
+            "licenseDeclared": "NONE",
+            "name": "io.netty:netty-buffer",
+            "versionInfo": "4.1.86.Final",
+            "downloadLocation": "NOASSERTION"
+        }
+    ],
+    "files": [
+        {
+            "SPDXID": "SPDXRef-File-135a9bb5a1940078",
+            "fileName": "lib/zookeeper-jute-3.8.1.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-1700ec47ee180782",
+            "fileName": "lib/jetty-util-9.4.49.v20220914.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-172297574c8d1795",
+            "fileName": "lib/netty-transport-native-unix-common-4.1.86.Final.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-229537d82c8c10e",
+            "fileName": "lib/jackson-core-2.13.4.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-28cff817a3a78b03",
+            "fileName": "lib/jetty-servlet-9.4.49.v20220914.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-2f74396d283b78f7",
+            "fileName": "lib/jetty-util-ajax-9.4.49.v20220914.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-3601642a5ca119ae",
+            "fileName": "lib/commons-cli-1.5.0.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-3a1cf2770ec63381",
+            "fileName": "lib/zookeeper-3.8.1.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-3dc74cc3e303ecd7",
+            "fileName": "lib/audience-annotations-0.12.0.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-439b33efadb75a29",
+            "fileName": "lib/simpleclient-0.9.0.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-459089e09dbe0f31",
+            "fileName": "lib/netty-codec-4.1.86.Final.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-4bd12a76a3835a3e",
+            "fileName": "lib/netty-transport-4.1.86.Final.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-54b1fa244a6425f5",
+            "fileName": "lib/jetty-server-9.4.49.v20220914.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-649a6c8629ee6d99",
+            "fileName": "lib/metrics-core-4.1.12.1.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-661a52e81b6c5790",
+            "fileName": "lib/netty-transport-classes-epoll-4.1.86.Final.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-689e3788d1b4df49",
+            "fileName": "lib/netty-buffer-4.1.86.Final.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-749e2a492faff0b2",
+            "fileName": "lib/netty-common-4.1.86.Final.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-858623e9c161e1c9",
+            "fileName": "lib/netty-resolver-4.1.86.Final.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-8f2e14f7ac7c78a6",
+            "fileName": "lib/jetty-http-9.4.49.v20220914.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-9496cea44b250336",
+            "fileName": "lib/jackson-databind-2.13.4.2.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-953a8f7545a0861d",
+            "fileName": "lib/simpleclient_common-0.9.0.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-a4cb993af166f7c2",
+            "fileName": "lib/commons-io-2.11.0.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-acd03d238cba74e3",
+            "fileName": "lib/logback-classic-1.2.10.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-aedfa33a1fead9f",
+            "fileName": "lib/netty-handler-4.1.86.Final.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-aff124d19d1c1e7d",
+            "fileName": "lib/javax.servlet-api-3.1.0.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-b41042530af6bb8a",
+            "fileName": "lib/logback-core-1.2.10.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-bc7c6131e6133de5",
+            "fileName": "lib/snappy-java-1.1.7.7.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-bfe57dee89c29422",
+            "fileName": "lib/jetty-io-9.4.49.v20220914.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-c33c163ea31afa06",
+            "fileName": "lib/jline-2.14.6.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-c3d1f495c7d6d1da",
+            "fileName": "lib/zookeeper-prometheus-metrics-3.8.1.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-c4a11b0a9516efc",
+            "fileName": "lib/jetty-security-9.4.49.v20220914.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-ce6fd8a9832fd7a",
+            "fileName": "lib/slf4j-api-1.7.30.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-d4c871d88a75105f",
+            "fileName": "lib/simpleclient_servlet-0.9.0.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-da16a6ae4c07f825",
+            "fileName": "lib/simpleclient_hotspot-0.9.0.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-e805739fdf77fc63",
+            "fileName": "lib/netty-transport-native-epoll-4.1.86.Final.jar"
+        },
+        {
+            "SPDXID": "SPDXRef-File-f6f3152992570601",
+            "fileName": "lib/jackson-annotations-2.13.4.jar"
+        }
+    ]
+}
