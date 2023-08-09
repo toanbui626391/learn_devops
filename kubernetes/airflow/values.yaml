@@ -20,7 +20,7 @@ airflow:
   ## - allowed values: "CeleryExecutor", "KubernetesExecutor", "CeleryKubernetesExecutor"
   ## - customize the "KubernetesExecutor" pod-template with `airflow.kubernetesPodTemplate.*`
   ##
-  executor: CeleryExecutor
+  executor: KubernetesExecutor
 
   ## the fernet encryption key (sets `AIRFLOW__CORE__FERNET_KEY`)
   ## - [WARNING] you must change this value to ensure the security of your airflow
