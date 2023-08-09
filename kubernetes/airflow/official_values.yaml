@@ -557,17 +557,17 @@ workers:
     #           periodSeconds: 15
 
     # Query to use for KEDA autoscaling. Must return a single integer.
-    # query: >-
-    #   SELECT ceil(COUNT(*)::decimal / {{ .Values.config.celery.worker_concurrency }})
-    #   FROM task_instance
-    #   WHERE (state='running' OR state='queued')
-    #   {{- if eq .Values.executor "CeleryKubernetesExecutor" }}
-    #   AND queue != '{{ .Values.config.celery_kubernetes_executor.kubernetes_queue }}'
-    #   {{- end }}
+    query: >-
+      SELECT ceil(COUNT(*)::decimal / {{ .Values.config.celery.worker_concurrency }})
+      FROM task_instance
+      WHERE (state='running' OR state='queued')
+      {{- if eq .Values.executor "CeleryKubernetesExecutor" }}
+      AND queue != '{{ .Values.config.celery_kubernetes_executor.kubernetes_queue }}'
+      {{- end }}
 
     # Weather to use PGBouncer to connect to the database or not when it is enabled
     # This configuration will be ignored if PGBouncer is not enabled
-    # usePgbouncer: true
+    usePgbouncer: true
 
   persistence:
     # Enable persistent volumes
@@ -639,7 +639,7 @@ workers:
 
   # Select certain nodes for airflow worker pods.
   nodeSelector: {}
-  # runtimeClassN ame: ~
+  runtimeClassName: ~
   priorityClassName: ~
   affinity: {}
   # default worker affinity is:
@@ -724,11 +724,11 @@ scheduler:
 
   # Wait for at most 10 minutes (6*10s) for the scheduler container to startup.
   # livenessProbe kicks in after the startup
-  # startupProbe:
-  #   failureThreshold: 6
-  #   periodSeconds: 10
-  #   timeoutSeconds: 20
-  #   command: ~
+  startupProbe:
+    failureThreshold: 6
+    periodSeconds: 10
+    timeoutSeconds: 20
+    command: ~
   # Airflow 2.0 allows users to run multiple schedulers,
   # However this feature is only recommended for MySQL 8+ and Postgres
   replicas: 1
@@ -921,7 +921,7 @@ createUserJob:
   serviceAccount:
     # default value is true
     # ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
-    # automountServiceAccountToken: true
+    automountServiceAccountToken: true
     # Specifies whether a ServiceAccount should be created
     create: true
     # The name of the ServiceAccount to use.
@@ -1074,11 +1074,11 @@ webserver:
     periodSeconds: 10
     scheme: HTTP
 
-  # startupProbe:
-  #   timeoutSeconds: 20
-  #   failureThreshold: 6
-  #   periodSeconds: 10
-  #   scheme: HTTP
+  startupProbe:
+    timeoutSeconds: 20
+    failureThreshold: 6
+    periodSeconds: 10
+    scheme: HTTP
 
   # Number of webservers
   replicas: 1
@@ -1741,7 +1741,7 @@ statsd:
   overrideMappings: []
 
   podAnnotations: {}
-  # env: []
+  env: []
 
 # PgBouncer settings
 pgbouncer:
@@ -2060,7 +2060,7 @@ cleanup:
   serviceAccount:
     # default value is true
     # ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
-    # automountServiceAccountToken: true
+    automountServiceAccountToken: true
     # Specifies whether a ServiceAccount should be created
     create: true
     # The name of the ServiceAccount to use.
