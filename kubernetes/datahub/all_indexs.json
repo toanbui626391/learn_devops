@@ -28,6 +28,15 @@
                     },
                     "type": "text"
                 },
+                "browsePath": {
+                    "fields": {
+                        "keyword": {
+                            "ignore_above": 256,
+                            "type": "keyword"
+                        }
+                    },
+                    "type": "text"
+                },
                 "browserId": {
                     "type": "keyword"
                 },
@@ -94,6 +103,15 @@
                     },
                     "type": "text"
                 },
+                "entityTypes": {
+                    "fields": {
+                        "keyword": {
+                            "ignore_above": 256,
+                            "type": "keyword"
+                        }
+                    },
+                    "type": "text"
+                },
                 "entityUrn": {
                     "fields": {
                         "keyword": {
@@ -116,6 +134,15 @@
                     "type": "text"
                 },
                 "filterMode": {
+                    "fields": {
+                        "keyword": {
+                            "ignore_above": 256,
+                            "type": "keyword"
+                        }
+                    },
+                    "type": "text"
+                },
+                "groupName": {
                     "fields": {
                         "keyword": {
                             "ignore_above": 256,
@@ -148,6 +175,27 @@
                     },
                     "type": "text"
                 },
+                "optionType": {
+                    "fields": {
+                        "keyword": {
+                            "ignore_above": 256,
+                            "type": "keyword"
+                        }
+                    },
+                    "type": "text"
+                },
+                "originPath": {
+                    "fields": {
+                        "keyword": {
+                            "ignore_above": 256,
+                            "type": "keyword"
+                        }
+                    },
+                    "type": "text"
+                },
+                "pageNumber": {
+                    "type": "long"
+                },
                 "path": {
                     "fields": {
                         "keyword": {
@@ -175,6 +223,15 @@
                     },
                     "type": "text"
                 },
+                "referrer": {
+                    "fields": {
+                        "keyword": {
+                            "ignore_above": 256,
+                            "type": "keyword"
+                        }
+                    },
+                    "type": "text"
+                },
                 "renderId": {
                     "fields": {
                         "keyword": {
@@ -185,6 +242,15 @@
                     "type": "text"
                 },
                 "renderType": {
+                    "fields": {
+                        "keyword": {
+                            "ignore_above": 256,
+                            "type": "keyword"
+                        }
+                    },
+                    "type": "text"
+                },
+                "resultType": {
                     "fields": {
                         "keyword": {
                             "ignore_above": 256,
@@ -282,6 +348,88 @@
                     }
                 },
                 "uuid": "hNG_l0-_TS6kFlIF983SsQ",
+                "version": {
+                    "created": "7100199"
+                }
+            }
+        }
+    },
+    ".tasks": {
+        "aliases": {},
+        "mappings": {
+            "_meta": {
+                "version": 3
+            },
+            "dynamic": "strict",
+            "properties": {
+                "completed": {
+                    "type": "boolean"
+                },
+                "error": {
+                    "enabled": false,
+                    "type": "object"
+                },
+                "response": {
+                    "enabled": false,
+                    "type": "object"
+                },
+                "task": {
+                    "properties": {
+                        "action": {
+                            "type": "keyword"
+                        },
+                        "cancellable": {
+                            "type": "boolean"
+                        },
+                        "description": {
+                            "type": "text"
+                        },
+                        "headers": {
+                            "enabled": false,
+                            "type": "object"
+                        },
+                        "id": {
+                            "type": "long"
+                        },
+                        "node": {
+                            "type": "keyword"
+                        },
+                        "parent_task_id": {
+                            "type": "keyword"
+                        },
+                        "running_time_in_nanos": {
+                            "type": "long"
+                        },
+                        "start_time_in_millis": {
+                            "type": "long"
+                        },
+                        "status": {
+                            "enabled": false,
+                            "type": "object"
+                        },
+                        "type": {
+                            "type": "keyword"
+                        }
+                    }
+                }
+            }
+        },
+        "settings": {
+            "index": {
+                "auto_expand_replicas": "0-1",
+                "creation_date": "1691989864738",
+                "number_of_replicas": "0",
+                "number_of_shards": "1",
+                "priority": "2147483647",
+                "provided_name": ".tasks",
+                "routing": {
+                    "allocation": {
+                        "include": {
+                            "_tier_preference": "data_content"
+                        }
+                    }
+                },
+                "uuid": "0XYITlVuQgubFs1qRxIsjA",
                 "version": {
                     "created": "7100199"
                 }
@@ -10094,8 +10242,10 @@
             }
         }
     },
-    "datasetindex_v2": {
-        "aliases": {},
+    "datasetindex_v2_1691989864363": {
+        "aliases": {
+            "datasetindex_v2": {}
+        },
         "mappings": {
             "properties": {
                 "browsePathV2": {
@@ -10817,11 +10967,14 @@
                         }
                     }
                 },
-                "creation_date": "1691835840342",
+                "blocks": {
+                    "write": "false"
+                },
+                "creation_date": "1691989864407",
                 "max_ngram_diff": "17",
                 "number_of_replicas": "1",
                 "number_of_shards": "1",
-                "provided_name": "datasetindex_v2",
+                "provided_name": "datasetindex_v2_1691989864363",
                 "refresh_interval": "1s",
                 "routing": {
                     "allocation": {
@@ -10830,7 +10983,7 @@
                         }
                     }
                 },
-                "uuid": "SpN8fJ-aTKms5EyfPTYlPA",
+                "uuid": "qrnMtsB_QUuooqZeZ0DvPg",
                 "version": {
                     "created": "7100199"
                 }
