@@ -190,7 +190,7 @@ triggerer:
 
   ## the number of triggerer Pods to run
   replicas: 1
-
+redis
   ## resource requests/limits for the triggerer Pods
   ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
   resources: {}

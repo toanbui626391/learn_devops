@@ -1,0 +1,95 @@
+{
+    "_shards": {
+        "failed": 0,
+        "skipped": 0,
+        "successful": 1,
+        "total": 1
+    },
+    "hits": {
+        "hits": [
+            {
+                "_id": "urn%3Ali%3Adataset%3A%28urn%3Ali%3AdataPlatform%3Apostgres%2Cpostgres.public.categories%2CPROD%29",
+                "_index": "datasetindex_v2",
+                "_score": 3.0505047,
+                "_source": {
+                    "browsePathV2": "\u241fpostgres\u241fpublic",
+                    "browsePaths": [
+                        "/prod/postgres/postgres/public"
+                    ],
+                    "container": "urn:li:container:a208486b83be39fa411922e07701d984",
+                    "customProperties": [],
+                    "fieldDescriptions": [],
+                    "fieldGlossaryTerms": [],
+                    "fieldLabels": [],
+                    "fieldPaths": [
+                        "category_id",
+                        "category_name",
+                        "description",
+                        "picture"
+                    ],
+                    "fieldTags": [],
+                    "hasContainer": true,
+                    "hasDescription": false,
+                    "id": "postgres.public.categories",
+                    "name": "categories",
+                    "origin": "PROD",
+                    "platform": "urn:li:dataPlatform:postgres",
+                    "removed": false,
+                    "typeNames": [
+                        "Table"
+                    ],
+                    "urn": "urn:li:dataset:(urn:li:dataPlatform:postgres,postgres.public.categories,PROD)"
+                },
+                "_type": "_doc"
+            },
+            {
+                "_id": "urn%3Ali%3Adataset%3A%28urn%3Ali%3AdataPlatform%3Apostgres%2Cpostgres.public.products%2CPROD%29",
+                "_index": "datasetindex_v2",
+                "_score": 1.9261851,
+                "_source": {
+                    "browsePathV2": "\u241fpostgres\u241fpublic",
+                    "browsePaths": [
+                        "/prod/postgres/postgres/public"
+                    ],
+                    "container": "urn:li:container:a208486b83be39fa411922e07701d984",
+                    "customProperties": [],
+                    "fieldDescriptions": [],
+                    "fieldGlossaryTerms": [],
+                    "fieldLabels": [],
+                    "fieldPaths": [
+                        "product_id",
+                        "product_name",
+                        "supplier_id",
+                        "category_id",
+                        "quantity_per_unit",
+                        "unit_price",
+                        "units_in_stock",
+                        "units_on_order",
+                        "reorder_level",
+                        "discontinued"
+                    ],
+                    "fieldTags": [],
+                    "hasContainer": true,
+                    "hasDescription": false,
+                    "id": "postgres.public.products",
+                    "name": "products",
+                    "origin": "PROD",
+                    "platform": "urn:li:dataPlatform:postgres",
+                    "removed": false,
+                    "typeNames": [
+                        "Table"
+                    ],
+                    "urn": "urn:li:dataset:(urn:li:dataPlatform:postgres,postgres.public.products,PROD)"
+                },
+                "_type": "_doc"
+            }
+        ],
+        "max_score": 3.0505047,
+        "total": {
+            "relation": "eq",
+            "value": 2
+        }
+    },
+    "timed_out": false,
+    "took": 3
+}

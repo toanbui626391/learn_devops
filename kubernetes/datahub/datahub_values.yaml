@@ -227,8 +227,8 @@ datahubUpgrade:
   batchSize: 1000
   batchDelayMs: 100
   noCodeDataMigration:
-    sqlDbType: "MYSQL"
-    # sqlDbType: "POSTGRES"
+    # sqlDbType: "MYSQL"
+    sqlDbType: "POSTGRES"
   podSecurityContext: {}
     # fsGroup: 1000
   securityContext: {}

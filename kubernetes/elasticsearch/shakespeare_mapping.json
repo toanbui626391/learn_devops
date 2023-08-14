@@ -1,6 +1,6 @@
-{
+"""{
     "mappings" : {
-     "one" : {
+     "_default_" : {
       "properties" : {
        "speaker" : {"type": "keyword" },
        "play_name" : {"type": "keyword" },
@@ -10,3 +10,4 @@
      }
     }
    }
+   """

@@ -1,0 +1,26 @@
+source:
+  type: postgres
+  config:
+    # Coordinates
+    host_port: localhost:5432
+    database: postgres
+
+    # Credentials
+    username: postgres
+    password: Buixuantoan@9162
+
+    # Options
+    # database_alias: DatabaseNameToBeIngested
+
+    # Optional: SSL configuration.
+    # options:
+    #   connect_args:
+    #     sslcert: "<<path to sslcert>>"
+    #     sslkey: "<<path to sslkey>>"
+    #     sslrootcert: "<<path to verification ca chain>>"
+    #     sslmode: "verify-full"
+
+sink:
+  type: "datahub-rest"
+  config:
+    server: "http://localhost:8080"

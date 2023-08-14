@@ -1,0 +1,178 @@
+{
+    ".ds-datahub_usage_event-000001": {
+        "aliases": {}
+    },
+    "assertion_assertionruneventaspect_v1": {
+        "aliases": {}
+    },
+    "assertionindex_v2": {
+        "aliases": {}
+    },
+    "chart_chartusagestatisticsaspect_v1": {
+        "aliases": {}
+    },
+    "chartindex_v2": {
+        "aliases": {}
+    },
+    "containerindex_v2": {
+        "aliases": {}
+    },
+    "corpgroupindex_v2": {
+        "aliases": {}
+    },
+    "corpuserindex_v2": {
+        "aliases": {}
+    },
+    "dashboard_dashboardusagestatisticsaspect_v1": {
+        "aliases": {}
+    },
+    "dashboardindex_v2": {
+        "aliases": {}
+    },
+    "dataflowindex_v2": {
+        "aliases": {}
+    },
+    "datahubaccesstokenindex_v2": {
+        "aliases": {}
+    },
+    "datahubexecutionrequestindex_v2": {
+        "aliases": {}
+    },
+    "datahubingestionsourceindex_v2": {
+        "aliases": {}
+    },
+    "datahubpolicyindex_v2": {
+        "aliases": {}
+    },
+    "datahubretentionindex_v2": {
+        "aliases": {}
+    },
+    "datahubroleindex_v2": {
+        "aliases": {}
+    },
+    "datahubsecretindex_v2": {
+        "aliases": {}
+    },
+    "datahubstepstateindex_v2": {
+        "aliases": {}
+    },
+    "datahubupgradeindex_v2": {
+        "aliases": {}
+    },
+    "datahubviewindex_v2": {
+        "aliases": {}
+    },
+    "datajob_datahubingestioncheckpointaspect_v1": {
+        "aliases": {}
+    },
+    "datajob_datahubingestionrunsummaryaspect_v1": {
+        "aliases": {}
+    },
+    "datajobindex_v2": {
+        "aliases": {}
+    },
+    "dataplatformindex_v2": {
+        "aliases": {}
+    },
+    "dataplatforminstanceindex_v2": {
+        "aliases": {}
+    },
+    "dataprocessindex_v2": {
+        "aliases": {}
+    },
+    "dataprocessinstance_dataprocessinstanceruneventaspect_v1": {
+        "aliases": {}
+    },
+    "dataprocessinstanceindex_v2": {
+        "aliases": {}
+    },
+    "dataproductindex_v2": {
+        "aliases": {}
+    },
+    "dataset_datasetprofileaspect_v1": {
+        "aliases": {}
+    },
+    "dataset_datasetusagestatisticsaspect_v1": {
+        "aliases": {}
+    },
+    "dataset_operationaspect_v1": {
+        "aliases": {}
+    },
+    "datasetindex_v2": {
+        "aliases": {}
+    },
+    "domainindex_v2": {
+        "aliases": {}
+    },
+    "globalsettingsindex_v2": {
+        "aliases": {}
+    },
+    "glossarynodeindex_v2": {
+        "aliases": {}
+    },
+    "glossarytermindex_v2": {
+        "aliases": {}
+    },
+    "graph_service_v1": {
+        "aliases": {}
+    },
+    "ilm-history-3-000001": {
+        "aliases": {
+            "ilm-history-3": {
+                "is_hidden": true,
+                "is_write_index": true
+            }
+        }
+    },
+    "invitetokenindex_v2": {
+        "aliases": {}
+    },
+    "mlfeatureindex_v2": {
+        "aliases": {}
+    },
+    "mlfeaturetableindex_v2": {
+        "aliases": {}
+    },
+    "mlmodeldeploymentindex_v2": {
+        "aliases": {}
+    },
+    "mlmodelgroupindex_v2": {
+        "aliases": {}
+    },
+    "mlmodelindex_v2": {
+        "aliases": {}
+    },
+    "mlprimarykeyindex_v2": {
+        "aliases": {}
+    },
+    "notebookindex_v2": {
+        "aliases": {}
+    },
+    "ownershiptypeindex_v2": {
+        "aliases": {}
+    },
+    "postindex_v2": {
+        "aliases": {}
+    },
+    "queryindex_v2": {
+        "aliases": {}
+    },
+    "roleindex_v2": {
+        "aliases": {}
+    },
+    "schemafieldindex_v2": {
+        "aliases": {}
+    },
+    "system_metadata_service_v1": {
+        "aliases": {}
+    },
+    "tagindex_v2": {
+        "aliases": {}
+    },
+    "telemetryindex_v2": {
+        "aliases": {}
+    },
+    "testindex_v2": {
+        "aliases": {}
+    }
+}
