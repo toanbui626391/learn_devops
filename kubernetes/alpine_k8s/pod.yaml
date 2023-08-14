@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: alpine_k8s
+  name: alpine-k8s
   namespace: default
 spec:
   containers:
   - image: alpine/k8s
     imagePullPolicy: IfNotPresent
-    name: alpine_k8s
+    name: alpine-k8s
   restartPolicy: Always
