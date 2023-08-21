@@ -2,6 +2,12 @@
     ".ds-datahub_usage_event-000001": {
         "aliases": {}
     },
+    ".ds-datahub_usage_event-000002": {
+        "aliases": {}
+    },
+    ".tasks": {
+        "aliases": {}
+    },
     "assertion_assertionruneventaspect_v1": {
         "aliases": {}
     },
@@ -96,9 +102,6 @@
         "aliases": {}
     },
     "dataset_operationaspect_v1": {
-        "aliases": {}
-    },
-    "datasetindex_v2": {
         "aliases": {}
     },
     "domainindex_v2": {
