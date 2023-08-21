@@ -531,6 +531,24 @@
                     },
                     "type": "text"
                 },
+                "quickFilterType": {
+                    "fields": {
+                        "keyword": {
+                            "ignore_above": 256,
+                            "type": "keyword"
+                        }
+                    },
+                    "type": "text"
+                },
+                "quickFilterValue": {
+                    "fields": {
+                        "keyword": {
+                            "ignore_above": 256,
+                            "type": "keyword"
+                        }
+                    },
+                    "type": "text"
+                },
                 "referrer": {
                     "fields": {
                         "keyword": {
@@ -577,6 +595,24 @@
                     "type": "text"
                 },
                 "searchVersion": {
+                    "fields": {
+                        "keyword": {
+                            "ignore_above": 256,
+                            "type": "keyword"
+                        }
+                    },
+                    "type": "text"
+                },
+                "selectedQuickFilterTypes": {
+                    "fields": {
+                        "keyword": {
+                            "ignore_above": 256,
+                            "type": "keyword"
+                        }
+                    },
+                    "type": "text"
+                },
+                "selectedQuickFilterValues": {
                     "fields": {
                         "keyword": {
                             "ignore_above": 256,
@@ -10532,8 +10568,10 @@
             }
         }
     },
-    "datasetindex_v2": {
-        "aliases": {},
+    "datasetindex_v2_1692606884787": {
+        "aliases": {
+            "datasetindex_v2": {}
+        },
         "mappings": {
             "properties": {
                 "browsePathV2": {
@@ -11255,11 +11293,14 @@
                         }
                     }
                 },
-                "creation_date": "1692598008508",
+                "blocks": {
+                    "write": "false"
+                },
+                "creation_date": "1692606884846",
                 "max_ngram_diff": "17",
                 "number_of_replicas": "1",
                 "number_of_shards": "1",
-                "provided_name": "datasetindex_v2",
+                "provided_name": "datasetindex_v2_1692606884787",
                 "refresh_interval": "1s",
                 "routing": {
                     "allocation": {
@@ -11268,7 +11309,7 @@
                         }
                     }
                 },
-                "uuid": "1bzxniBHTvyfbnNVas3ZqQ",
+                "uuid": "yH8rwJfTSNa8zRHwbG4ebw",
                 "version": {
                     "created": "7100199"
                 }
