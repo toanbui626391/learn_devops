@@ -9,10 +9,11 @@ metadata:
     nginx.ingress.kubernetes.io/use-forwarded-headers: "true"
 spec:
   rules:
-  - http:
+  - host: "microk8s-dashboard.example.com"
+    http:
       paths:
       - pathType: Prefix
-        path: "*"
+        path: "/"
         backend:
           service:
             name: kubernetes-dashboard
