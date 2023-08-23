@@ -12,7 +12,7 @@ spec:
   - http:
       paths:
       - pathType: Prefix
-        path: "microk9s-dashboard/(.*)"
+        path: "*"
         backend:
           service:
             name: kubernetes-dashboard
